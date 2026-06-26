@@ -228,7 +228,37 @@ function initAbout() {
     scrollTrigger: { trigger: ".about-photo", start: "top bottom", end: "bottom top", scrub: true },
   })
     .fromTo(".about-photo", { opacity: 0, filter: "blur(20px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.25 }, 0)
-    .fromTo(".portrait", { yPercent: -12 }, { yPercent: 12, ease: "none" }, 0);
+    .fromTo(".about-media__asset", { yPercent: -8 }, { yPercent: 8, ease: "none" }, 0);
+
+  const aboutFrame = document.querySelector(".about-media__asset");
+  if (aboutFrame instanceof HTMLImageElement) {
+    const frameCount = 97;
+    const frameSrc = (index) => `/about-frames/me-${String(index).padStart(3, "0")}.jpg`;
+    const frames = Array.from({ length: frameCount }, (_, index) => {
+      const image = new Image();
+      image.src = frameSrc(index + 1);
+      return image;
+    });
+    let activeFrame = 0;
+
+    const scrubFrames = ({ progress }) => {
+      const nextFrame = Math.min(frameCount - 1, Math.max(0, Math.round(progress * (frameCount - 1))));
+      if (nextFrame === activeFrame) return;
+      activeFrame = nextFrame;
+      aboutFrame.src = frames[nextFrame].src;
+    };
+
+    const frameTrigger = ScrollTrigger.create({
+      trigger: ".about",
+      start: "top bottom",
+      end: "bottom top",
+      scrub: true,
+      invalidateOnRefresh: true,
+      onUpdate: scrubFrames,
+      onRefresh: scrubFrames,
+    });
+    scrubFrames(frameTrigger);
+  }
 
   const path = document.querySelector(".fluid-line path");
   if (!path) return;
