@@ -257,8 +257,7 @@ em {
   text-shadow: 0 0 20px #000;
 }
 
-.world-corners i,
-.contact-frame > i {
+.world-corners i {
   position: absolute;
   width: 18px;
   height: 18px;
@@ -266,23 +265,19 @@ em {
 }
 
 .world-corners i::before,
-.world-corners i::after,
-.contact-frame > i::before,
-.contact-frame > i::after {
+.world-corners i::after {
   content: "";
   position: absolute;
   background: #fff;
 }
 
-.world-corners i::before,
-.contact-frame > i::before {
+.world-corners i::before {
   left: 50%;
   width: 1px;
   height: 100%;
 }
 
-.world-corners i::after,
-.contact-frame > i::after {
+.world-corners i::after {
   top: 50%;
   width: 100%;
   height: 1px;
@@ -864,142 +859,24 @@ em {
   line-height: 2;
 }
 
-.contact {
-  position: relative;
-  z-index: 930;
-  min-height: 180vh;
-  overflow: hidden;
-  background: var(--white);
-}
-
-.contact-pin {
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  overflow: hidden;
-  color: var(--black);
-}
-
-.contact-blob {
-  position: absolute;
-  left: 50%;
-  bottom: 0;
-  width: 300vmax;
-  height: 300vmax;
-  border-radius: 50%;
-  background: var(--white);
-  transform: translate(-50%, 50%) scale(0);
-}
-
-.contact h2 {
-  position: absolute;
-  left: 6%;
-  top: 10%;
-  z-index: 2;
-  font-size: clamp(90px, 13vw, 205px);
-  line-height: 0.86;
-  letter-spacing: -0.075em;
-  font-weight: 800;
-}
-
-.contact-copy {
-  position: absolute;
-  z-index: 3;
-  width: 13%;
-  font-size: clamp(15px, 1.45vw, 23px);
-  line-height: 1.03;
-  text-align: justify;
-}
-
-.contact-copy--one {
-  left: 56.25%;
-  top: 32%;
-}
-
-.contact-copy--two {
-  left: 81.25%;
-  top: 72%;
-}
-
-.contact-frame {
-  position: absolute;
-  z-index: 2;
-  width: 25%;
-  aspect-ratio: 2 / 3;
-  overflow: hidden;
-}
-
-.contact-frame--one {
-  left: 75%;
-  top: 10%;
-}
-
-.contact-frame--two {
-  left: 50%;
-  top: 70%;
-}
-
-.contact-frame > i:nth-of-type(1) { left: 8px; top: 8px; }
-.contact-frame > i:nth-of-type(2) { right: 8px; top: 8px; }
-.contact-frame > i:nth-of-type(3) { left: 8px; bottom: 8px; }
-.contact-frame > i:nth-of-type(4) { right: 8px; bottom: 8px; }
-
-.contact-art {
-  width: 100%;
-  height: 145%;
-  background:
-    radial-gradient(circle at 35% 40%, #c2b1ff 0 16%, transparent 38%),
-    radial-gradient(circle at 72% 66%, #ff5141 0 12%, transparent 34%),
-    conic-gradient(from 70deg at 50% 45%, #160024, #7837ff, #ff1b09, #2a0011, #160024);
-  filter: contrast(1.25);
-}
-
-.contact-art::after {
-  content: "";
-  position: absolute;
-  inset: 13%;
-  border-radius: 44% 56% 67% 33% / 49% 34% 66% 51%;
-  background: linear-gradient(135deg, #e2dcff, #342178 48%, #11000b);
-  box-shadow: -45px 35px 0 rgba(232, 217, 255, 0.58), 55px -10px 0 rgba(51, 23, 124, 0.8);
-  transform: rotate(28deg);
-}
-
-.contact-art--two {
-  filter: hue-rotate(90deg) contrast(1.4);
-}
-
-.contact-bottom {
-  position: absolute;
-  left: 6%;
-  bottom: 8vh;
-  z-index: 3;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 1.5rem;
-  font-size: 1.3rem;
-}
-
-.contact-bottom nav {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-}
-
 .footer-transition {
   position: relative;
-  z-index: 931;
-  height: 80vh;
+  z-index: 930;
+  height: 185vh;
+  background: var(--white);
   pointer-events: none;
 }
 
 .footer {
   position: fixed;
   inset: 0;
-  z-index: 925;
+  z-index: 935;
   visibility: hidden;
+  min-height: 100vh;
   background: var(--black);
   overflow: hidden;
+  clip-path: circle(var(--footer-reveal, 0vmax) at 50% 100%);
+  will-change: clip-path;
 }
 
 .footer-top {
@@ -1037,15 +914,6 @@ em {
 
 .footer-name span {
   font-weight: 400;
-}
-
-.footer-name em {
-  font-size: 1.05em;
-}
-
-.footer-name i {
-  color: var(--red-solid);
-  font: italic 1em/1 "Instrument Serif", serif;
 }
 
 .ascii {
@@ -1179,45 +1047,6 @@ em {
 
   .skills-arrow {
     font-size: 40vw;
-  }
-
-  .contact h2 {
-    left: 1.5rem;
-    font-size: 22vw;
-  }
-
-  .contact-copy {
-    width: 36%;
-    font-size: 3.6vw;
-  }
-
-  .contact-copy--one {
-    left: 12%;
-    top: 38%;
-  }
-
-  .contact-frame {
-    width: 52%;
-  }
-
-  .contact-frame--one {
-    left: 48%;
-    top: 18%;
-  }
-
-  .contact-frame--two {
-    left: 8%;
-    top: 74%;
-  }
-
-  .contact-copy--two {
-    left: 64%;
-    top: 74%;
-  }
-
-  .contact-bottom {
-    left: 1.5rem;
-    font-size: 1rem;
   }
 
   .footer-top {

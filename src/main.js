@@ -819,22 +819,13 @@ function initSkills() {
   });
 }
 
-function initContact() {
-  const timeline = gsap.timeline({
-    scrollTrigger: { trigger: ".contact", start: "top bottom", end: "bottom bottom", scrub: 1 },
-  });
-  timeline
-    .to(".contact-blob", { scale: 1, duration: 0.33, ease: "power2.inOut" }, 0)
-    .fromTo(".contact h2", { x: "-8vw", y: "14vh" }, { x: 0, y: 0, duration: 0.3 }, 0.16)
-    .fromTo(".contact-frame--one", { y: "55vh", filter: "blur(12px)" }, { y: 0, filter: "blur(0px)", duration: 0.35 }, 0.17)
-    .fromTo(".contact-copy--one", { y: "35vh", opacity: 0 }, { y: 0, opacity: 1, duration: 0.28 }, 0.25)
-    .fromTo(".contact-frame--two", { y: "45vh", opacity: 0 }, { y: 0, opacity: 1, duration: 0.28 }, 0.52)
-    .fromTo(".contact-copy--two", { y: "30vh", opacity: 0 }, { y: 0, opacity: 1, duration: 0.25 }, 0.62)
-    .fromTo(".contact-bottom", { y: 80, opacity: 0 }, { y: 0, opacity: 1, duration: 0.2 }, 0.68);
-}
-
 function initFooter() {
   const footer = document.querySelector(".footer");
+  if (!footer) return;
+
+  const revealEase = gsap.parseEase("power2.inOut");
+  footer.style.setProperty("--footer-reveal", "0vmax");
+
   ScrollTrigger.create({
     trigger: ".footer-transition",
     start: "top bottom",
@@ -842,12 +833,17 @@ function initFooter() {
     scrub: true,
     onEnter: () => { footer.style.visibility = "visible"; },
     onEnterBack: () => { footer.style.visibility = "visible"; },
-    onLeaveBack: () => { footer.style.visibility = "hidden"; },
+    onLeaveBack: () => {
+      footer.style.visibility = "hidden";
+      footer.style.setProperty("--footer-reveal", "0vmax");
+    },
     onUpdate: ({ progress }) => {
-      gsap.set(".contact-pin", { y: -window.innerHeight * progress });
-      gsap.set(".footer-name", { y: 160 * (1 - progress) });
-      gsap.set(".ascii--left", { x: -180 * (1 - progress) });
-      gsap.set(".ascii--right", { x: 180 * (1 - progress) });
+      const radius = Math.max(0, revealEase(progress) * 165);
+      footer.style.visibility = progress > 0 ? "visible" : "hidden";
+      footer.style.setProperty("--footer-reveal", `${radius}vmax`);
+      gsap.set(".footer-name", { y: 120 * (1 - progress) });
+      gsap.set(".ascii--left", { x: -140 * (1 - progress), opacity: 0.72 * progress });
+      gsap.set(".ascii--right", { x: 140 * (1 - progress), opacity: 0.72 * progress });
     },
   });
 }
@@ -861,7 +857,6 @@ function initTimeline() {
     ["Projects", ".projects"],
     ["Gallery", ".circle-gallery"],
     ["Skills", ".skills"],
-    ["Contact", ".contact"],
   ];
 
   const update = () => {
@@ -907,7 +902,6 @@ initAbout();
 initProjects();
 initGallery();
 initSkills();
-initContact();
 initFooter();
 initTimeline();
 initPreviewJump();
