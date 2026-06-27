@@ -386,8 +386,51 @@ function initProjects() {
   const items = gsap.utils.toArray(".project-item");
   const preview = document.querySelector(".project-preview");
   const art = preview.querySelector(".project-art");
+  const detail = preview.querySelector(".project-detail");
   const date = preview.querySelector(".project-preview__date");
   const cursor = document.querySelector(".project-cursor");
+  const projectDetails = [
+    {
+      title: "Nébula Website",
+      description: "Direction créative, interface responsive et animations fluides pour une présence web immersive.",
+      stack: "Creative development / Motion / Front-end",
+    },
+    {
+      title: "Anima",
+      description: "Prototype interactif centré sur les transitions, les micro-interactions et la sensation de navigation.",
+      stack: "Interaction design / GSAP / UI",
+    },
+    {
+      title: "Osmose App",
+      description: "Interface produit claire pour organiser des contenus, comparer des états et accélérer les décisions.",
+      stack: "Product design / Dashboard / UX",
+    },
+    {
+      title: "Zenith",
+      description: "Expérience éditoriale verticale avec rythme typographique, sections immersives et narration scrollée.",
+      stack: "Editorial / Scroll experience / Art direction",
+    },
+    {
+      title: "Monoform",
+      description: "Système visuel minimaliste autour de composants réutilisables et d’une grille très structurée.",
+      stack: "Design system / Components / Front-end",
+    },
+    {
+      title: "ChromaBlock",
+      description: "Exploration colorée mêlant blocs dynamiques, transitions rapides et interactions au pointeur.",
+      stack: "Creative coding / Canvas / Motion",
+    },
+    {
+      title: "Symphony",
+      description: "Composition web rythmée par le mouvement, pensée pour donner une lecture fluide d’un contenu dense.",
+      stack: "Motion system / Layout / Performance",
+    },
+    {
+      title: "Echo",
+      description: "Landing interactive avec feedback visuel immédiat, détails soignés et navigation expressive.",
+      stack: "Landing page / Interaction / Front-end",
+    },
+  ];
   let current = -1;
   let visible = false;
   let targetRX = 0;
@@ -395,13 +438,22 @@ function initProjects() {
   let rx = 0;
   let ry = 0;
 
+  const updateDetail = (index) => {
+    const data = projectDetails[index];
+    if (!data) return;
+    detail.querySelector("h3").textContent = data.title;
+    detail.querySelector("p").textContent = data.description;
+    detail.querySelector("span").textContent = data.stack;
+  };
+
   const activate = (index) => {
     if (index === current) return;
     items.forEach((item, itemIndex) => item.classList.toggle("is-active", itemIndex === index));
-    art.className = `project-art project-art--${index}`;
-    art.querySelector("span").textContent = items[index].textContent.trim().charAt(0);
     date.textContent = items[index].dataset.date;
+    updateDetail(index);
     gsap.fromTo(art, { opacity: 0, scale: 0.96 }, { opacity: 1, scale: 1, duration: 0.35 });
+    detail.classList.add("is-visible");
+    gsap.fromTo(detail, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.28 });
     current = index;
   };
 
@@ -433,6 +485,15 @@ function initProjects() {
     activate(closest);
   };
 
+  items.forEach((item, index) => {
+    item.addEventListener("click", () => {
+      updateDetail(index);
+      activate(index);
+      detail.classList.add("is-visible");
+      gsap.to(detail, { opacity: 1, y: 0, duration: 0.3, overwrite: true });
+    });
+  });
+
   window.addEventListener("scroll", updateActive, { passive: true });
   lenis?.on("scroll", updateActive);
   updateActive();
@@ -442,8 +503,10 @@ function initProjects() {
   window.addEventListener("pointermove", (event) => {
     gsap.to(cursor, { x: event.clientX, y: event.clientY, duration: 0.25 });
     const rect = preview.getBoundingClientRect();
-    targetRY = ((event.clientX - rect.left) / rect.width - 0.5) * 11;
-    targetRX = -((event.clientY - rect.top) / rect.height - 0.5) * 8;
+    const pointerX = Math.min(1, Math.max(0, (event.clientX - rect.left) / rect.width));
+    const pointerY = Math.min(1, Math.max(0, (event.clientY - rect.top) / rect.height));
+    targetRY = (pointerX - 0.5) * 11;
+    targetRX = -(pointerY - 0.5) * 8;
   });
 
   gsap.ticker.add(() => {
