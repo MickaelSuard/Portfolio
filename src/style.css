@@ -87,6 +87,12 @@ em {
   align-items: baseline;
   transform: translateY(-50%);
   will-change: opacity;
+  cursor: none;
+}
+
+body.is-name-hover-ready .intro-name__first-group,
+body.is-name-hover-ready .intro-name__last-group {
+  pointer-events: auto;
 }
 
 .intro-name__first-group {
@@ -106,6 +112,39 @@ em {
 .intro-name__first,
 .intro-name__first-rest {
   font-weight: 400;
+}
+
+.intro-char {
+  transform-origin: 50% 70%;
+  will-change: transform, color, filter, font-weight;
+}
+
+body.is-name-hover-ready .intro-char {
+  pointer-events: auto;
+}
+
+.name-cursor {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 1030;
+  width: 72px;
+  height: 104px;
+  background: url("/cursor.png") 0 0 / contain no-repeat;
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.68) rotate(-5deg);
+  transform-origin: 0 0;
+  filter:
+    drop-shadow(1px 0 0 rgba(10, 10, 10, 0.75))
+    drop-shadow(0 1px 0 rgba(10, 10, 10, 0.75))
+    drop-shadow(-1px 0 0 rgba(10, 10, 10, 0.75))
+    drop-shadow(0 -1px 0 rgba(10, 10, 10, 0.75));
+  mix-blend-mode: normal;
+}
+
+.name-cursor span {
+  display: none;
 }
 
 

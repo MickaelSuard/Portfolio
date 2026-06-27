@@ -181,8 +181,115 @@ function splitIntroChars() {
   });
 }
 
+function initNameHover() {
+  const cursor = document.querySelector(".name-cursor");
+  const targets = [
+    { element: document.querySelector(".intro-name__first-group"), last: false },
+    { element: document.querySelector(".intro-name__last-group"), last: true },
+  ].filter(({ element }) => element);
+
+  if (!cursor || !targets.length || mobile) return;
+
+  const isReady = () => document.body.classList.contains("is-name-hover-ready");
+  const palettes = ["#f6f6f6", "#0096d6", "#eb9998", "#d9a441", "#a373d3"];
+  const letterTweens = new Map();
+
+  const getBaseColor = () => getComputedStyle(document.querySelector(".intro-name")).color;
+
+  const moveCursor = (event) => {
+    if (!isReady()) return;
+    cursor.style.left = `${event.clientX}px`;
+    cursor.style.top = `${event.clientY}px`;
+  };
+
+  const stopLetterTween = (char) => {
+    letterTweens.get(char)?.kill();
+    letterTweens.delete(char);
+  };
+
+  const resetChar = (char) => {
+    stopLetterTween(char);
+    gsap.killTweensOf(char, "y,rotation,scaleX,scaleY,filter,fontStyle,fontWeight");
+    gsap.set(char, { clearProps: "color" });
+    gsap.to(char, {
+      y: 0,
+      rotation: 0,
+      scaleX: 1,
+      scaleY: 1,
+      filter: "blur(0px)",
+      fontStyle: "normal",
+      fontWeight: 400,
+      duration: 0.36,
+      ease: "elastic.out(1, 0.5)",
+      overwrite: true,
+    });
+  };
+
+  const animateChar = (char) => {
+    if (!isReady()) return;
+    stopLetterTween(char);
+    gsap.killTweensOf(char, "y,rotation,scaleX,scaleY,filter,fontStyle,fontWeight");
+
+    const tween = gsap.timeline({ repeat: -1, repeatRefresh: true });
+    tween
+      .to(char, {
+        y: () => gsap.utils.random(-18, 13),
+        rotation: () => gsap.utils.random(-11, 11),
+        scaleX: () => gsap.utils.random(0.82, 1.2),
+        scaleY: () => gsap.utils.random(0.86, 1.18),
+        color: () => palettes[gsap.utils.random(0, palettes.length - 1, 1)],
+        filter: () => (Math.random() > 0.76 ? "blur(0.65px)" : "blur(0px)"),
+        fontStyle: () => (Math.random() > 0.5 ? "italic" : "normal"),
+        fontWeight: () => (Math.random() > 0.54 ? 800 : 400),
+        duration: 0.2,
+        ease: "power3.out",
+        overwrite: true,
+      })
+      .to(char, {
+        y: 0,
+        rotation: 0,
+        scaleX: 1,
+        scaleY: 1,
+        color: () => getBaseColor(),
+        filter: "blur(0px)",
+        fontStyle: "normal",
+        fontWeight: 400,
+        duration: 0.34,
+        ease: "elastic.out(1, 0.5)",
+      })
+      .to({}, { duration: 0.08 });
+
+    letterTweens.set(char, tween);
+  };
+
+  window.addEventListener("pointermove", moveCursor, { passive: true });
+
+  targets.forEach(({ element, last }) => {
+    const chars = gsap.utils.toArray(".intro-char", element);
+
+    chars.forEach((char) => {
+      char.addEventListener("pointerenter", () => animateChar(char));
+      char.addEventListener("pointerleave", () => resetChar(char));
+    });
+
+    element.addEventListener("pointerenter", (event) => {
+      if (!isReady()) return;
+      cursor.classList.toggle("is-last", last);
+      moveCursor(event);
+      gsap.to(cursor, { opacity: 1, scale: 1, rotation: 0, duration: 0.28, ease: "power3.out", overwrite: true });
+    });
+
+    element.addEventListener("pointerleave", () => {
+      gsap.to(cursor, { opacity: 0, scale: 0.68, rotation: -5, duration: 0.22, ease: "power3.inOut", overwrite: true });
+      chars.forEach((char) => resetChar(char));
+    });
+  });
+}
+
 function initIntro() {
   splitIntroChars();
+  initNameHover();
+  document.body.classList.remove("is-name-hover-ready");
   const heroBar = document.querySelector(".hero-bar");
   if (heroBar && heroBar.parentElement !== document.body) document.body.append(heroBar);
   const heroLine = document.querySelector(".hero-line");
@@ -197,6 +304,7 @@ function initIntro() {
     gsap.set(".intro-bg, .transition-panels", { display: "none" });
     gsap.set(".hero-tagline", { opacity: 1, clipPath: "inset(0 0 0 0)" });
     heroChromeReady = true;
+    document.body.classList.add("is-name-hover-ready");
     setHeroChromeVisible(true, true);
     return;
   }
@@ -214,14 +322,17 @@ function initIntro() {
     .call(() => {
       heroChromeReady = true;
       setHeroChromeVisible(true);
-    }, null, "-=0.6");
+    }, null, "-=0.6")
+    .call(() => {
+      document.body.classList.add("is-name-hover-ready");
+    });
 }
 
 function initHeroScroll() {
   const name = document.querySelector(".intro-name");
   const firstGroup = document.querySelector(".intro-name__first-group");
   const lastGroup = document.querySelector(".intro-name__last-group");
-  const nameColorTargets = gsap.utils.toArray(".intro-name, .intro-name__first, .intro-name__first-rest, .intro-name__last, .intro-char");
+  const nameColorTargets = gsap.utils.toArray(".intro-name, .intro-name__first, .intro-name__first-rest, .intro-name__last");
   const viewport = document.querySelector(".world-viewport");
   const media = document.querySelector(".world-media__asset");
   const homeFrameCount = 121;
@@ -438,8 +549,8 @@ function createProjectCubePreview(art, initialProject) {
         if (fallbackImage) fallbackImage.src = currentImage;
         setVisual(project);
       },
-      pulse() {},
-      setActive() {},
+      pulse() { },
+      setActive() { },
     };
   }
 
@@ -608,7 +719,7 @@ function initProjects() {
       title: "Nébula Website",
       description: "Direction créative, interface responsive et animations fluides pour une présence web immersive.",
       stack: "Creative development / Motion / Front-end",
-      image: "./udl.jpg",
+      image: "/udl.jpg",
       tint: "rgba(93, 84, 156, 0.26)",
     },
     {
@@ -815,10 +926,10 @@ function createSkillPillPhysics(stage) {
 
   if (reduced) {
     return {
-      prepare: () => {},
-      drop: () => {},
-      stop: () => {},
-      resize: () => {},
+      prepare: () => { },
+      drop: () => { },
+      stop: () => { },
+      resize: () => { },
     };
   }
 
