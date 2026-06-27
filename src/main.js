@@ -370,14 +370,11 @@ function initAbout() {
       ease: "none",
       scrollTrigger: {
         trigger: ".about",
-        start: "top 92%",
+        start: "top 72%",
         endTrigger: ".projects",
-        end: "bottom 70%",
-        scrub: 1,
+        end: "bottom 88%",
+        scrub: 1.2,
         invalidateOnRefresh: true,
-        onEnter: () => gsap.set(path, { opacity: 1 }),
-        onEnterBack: () => gsap.set(path, { opacity: 1 }),
-        onLeaveBack: () => gsap.set(path, { strokeDashoffset: length, opacity: 0 }),
       },
     },
   );

@@ -5,7 +5,7 @@
   --white: #f6f6f6;
   --about-bg: var(--white);
   --red: linear-gradient(115deg, #5d549c 0%, #a373d3 34%, #eb9998 66%, #7e3a63 100%);
-  --red-solid: #eb9998;
+  --red-solid: #0096d6;
   --muted: rgba(255, 255, 255, 0.22);
 }
 
@@ -342,8 +342,8 @@ em {
 
 .about {
   position: relative;
-  min-height: 232vh;
-  padding: 10vh 4rem 78vh;
+  min-height: 188vh;
+  padding: 10vh 4rem 34vh;
   overflow: hidden;
   color: var(--black);
   background: var(--about-bg);
@@ -351,10 +351,10 @@ em {
 
 .fluid-line {
   position: absolute;
-  top: 85vh;
+  top: 24vh;
   left: 0;
   width: 100%;
-  height: 300vh;
+  height: 360vh;
   pointer-events: none;
   overflow: visible;
   z-index: 6;
