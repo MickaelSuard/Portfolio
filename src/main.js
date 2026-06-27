@@ -382,6 +382,218 @@ function initAbout() {
   );
 }
 
+function createProjectCubePreview(art, initialProject) {
+  const fallbackImage = art.querySelector(".project-art__image");
+  const grid = art.querySelector(".project-cube-grid");
+  const columns = 8;
+  const rows = 6;
+  const faces = ["front", "back", "left", "right", "top", "bottom"];
+  const defaultImage = fallbackImage?.getAttribute("src") || "./udl.jpg";
+  let currentImage = initialProject?.image || defaultImage;
+  let tileWidth = 0;
+  let tileHeight = 0;
+  let isBreathing = false;
+  let previewActive = false;
+  let changePulse = null;
+  let queuedProject = null;
+  let queuedIndex = 0;
+  const tileData = [];
+  const breathDelays = [];
+
+  const cssImage = (src) => `url("${new URL(src, window.location.href).href}")`;
+  const setVisual = (project) => {
+    art.style.setProperty("--project-tint", project?.tint || "rgba(93, 84, 156, 0.24)");
+  };
+  const setCubeImages = (front, back = front) => {
+    art.style.setProperty("--cube-front", cssImage(front));
+    art.style.setProperty("--cube-back", cssImage(back));
+  };
+  const syncTileMetrics = () => {
+    const rect = grid.getBoundingClientRect();
+    tileWidth = rect.width / columns;
+    tileHeight = rect.height / rows;
+    const tileSize = Math.min(tileWidth, tileHeight);
+    art.style.setProperty("--cube-z", `${Math.max(1, tileSize / 2)}px`);
+  };
+  const setTileImage = (tile, side, imagePath) => {
+    const face = tile.faces[side];
+    if (!face || !tileWidth || !tileHeight) return;
+    face.style.backgroundImage = cssImage(imagePath);
+    face.style.backgroundSize = `${tileWidth * columns}px ${tileHeight * rows}px`;
+    face.style.backgroundPosition = `${-(tile.col * tileWidth)}px ${-(tile.row * tileHeight)}px`;
+  };
+  const setProjectFaces = (imagePath, sides = faces) => {
+    syncTileMetrics();
+    tileData.forEach((tile) => {
+      sides.forEach((side) => setTileImage(tile, side, imagePath));
+    });
+  };
+
+  if (!grid || reduced) {
+    setVisual(initialProject);
+    return {
+      show(project) {
+        currentImage = project?.image || currentImage;
+        if (fallbackImage) fallbackImage.src = currentImage;
+        setVisual(project);
+      },
+      pulse() {},
+      setActive() {},
+    };
+  }
+
+  art.style.setProperty("--cube-cols", columns);
+  art.style.setProperty("--cube-rows", rows);
+  art.style.setProperty("--tile-bg-size-x", `${columns * 100}%`);
+  art.style.setProperty("--tile-bg-size-y", `${rows * 100}%`);
+  setVisual(initialProject);
+  setCubeImages(currentImage);
+
+  const fragment = document.createDocumentFragment();
+  for (let y = 0; y < rows; y += 1) {
+    for (let x = 0; x < columns; x += 1) {
+      const tile = document.createElement("span");
+      const cube = document.createElement("span");
+      const tileFaces = {};
+      tile.className = "project-cube-tile";
+      cube.className = "project-cube";
+      tile.style.setProperty("--tile-bg-x", `${columns === 1 ? 0 : (x / (columns - 1)) * 100}%`);
+      tile.style.setProperty("--tile-bg-y", `${rows === 1 ? 0 : (y / (rows - 1)) * 100}%`);
+      faces.forEach((face) => {
+        const element = document.createElement("span");
+        element.className = `project-cube-face project-cube-face--${face}`;
+        tileFaces[face] = element;
+        cube.append(element);
+      });
+      tile.append(cube);
+      fragment.append(tile);
+      tileData.push({ element: tile, cube, faces: tileFaces, row: y, col: x });
+    }
+  }
+  grid.replaceChildren(fragment);
+  setProjectFaces(currentImage);
+  window.addEventListener("resize", () => setProjectFaces(currentImage));
+  art.classList.add("is-cubes-ready");
+
+  const tiles = tileData.map((tile) => tile.element);
+  const cubes = tileData.map((tile) => tile.cube);
+  gsap.set(tiles, { transformOrigin: "50% 50%", transformStyle: "preserve-3d", force3D: true });
+  gsap.set(cubes, { transformOrigin: "50% 50%", transformStyle: "preserve-3d", force3D: true });
+
+  const breathe = (tileElement) => {
+    if (!isBreathing) return;
+    gsap.to(tileElement, {
+      z: gsap.utils.random(-24, 34, 1),
+      duration: gsap.utils.random(0.8, 1.5, 0.05),
+      ease: "sine.inOut",
+      force3D: true,
+      overwrite: false,
+      onComplete: () => breathe(tileElement),
+    });
+  };
+  const startBreathing = () => {
+    if (isBreathing) return;
+    isBreathing = true;
+    tileData.forEach((tile, index) => {
+      breathDelays.push(gsap.delayedCall(index * 0.015, () => breathe(tile.element)));
+    });
+  };
+  const stopBreathing = () => {
+    isBreathing = false;
+    breathDelays.splice(0).forEach((delayedCall) => delayedCall.kill());
+    gsap.killTweensOf(tiles, "z");
+    gsap.to(tiles, {
+      z: 0,
+      duration: 0.45,
+      ease: "sine.out",
+      force3D: true,
+      overwrite: "auto",
+    });
+  };
+  const revealProjectChange = (project, index = 0) => {
+    if (changePulse) {
+      queuedProject = project;
+      queuedIndex = index;
+      return;
+    }
+    const nextImage = project?.image || currentImage;
+    const orderedTiles = [...tileData].sort(() => Math.random() - 0.5);
+    gsap.killTweensOf(cubes, "z");
+    currentImage = nextImage;
+    setCubeImages(currentImage);
+    setProjectFaces(currentImage);
+    if (fallbackImage) fallbackImage.src = currentImage;
+
+    changePulse = gsap.timeline({
+      onComplete: () => {
+        changePulse = null;
+        if (queuedProject) {
+          const nextProject = queuedProject;
+          const nextIndex = queuedIndex;
+          queuedProject = null;
+          revealProjectChange(nextProject, nextIndex);
+        }
+      },
+    });
+
+    orderedTiles.forEach((tile, tileIndex) => {
+      const delay = tileIndex * 0.006;
+      const wave = Math.sin((tile.row + tile.col + index) * 0.9) * 10;
+      changePulse
+        .to(tile.cube, {
+          z: gsap.utils.random(18, 44, 1) + wave,
+          duration: 0.22,
+          ease: "power2.out",
+          force3D: true,
+        }, delay)
+        .to(tile.cube, {
+          z: 0,
+          duration: 0.34,
+          ease: "sine.inOut",
+          force3D: true,
+        }, delay + 0.16);
+    });
+  };
+  const setProjectDirectly = (project) => {
+    const nextImage = project?.image || currentImage;
+    currentImage = nextImage;
+    if (fallbackImage) fallbackImage.src = currentImage;
+    setCubeImages(currentImage);
+    setProjectFaces(currentImage);
+  };
+  return {
+    show(project, index = 0) {
+      const nextImage = project?.image || currentImage;
+
+      setVisual(project);
+      if (nextImage === currentImage) return;
+
+      if (!previewActive) {
+        setProjectDirectly(project);
+        return;
+      }
+
+      revealProjectChange(project, index);
+    },
+    pulse() {
+      startBreathing();
+    },
+    setActive(active) {
+      previewActive = active;
+      if (active) {
+        startBreathing();
+        return;
+      }
+      queuedProject = null;
+      changePulse?.kill();
+      changePulse = null;
+      gsap.killTweensOf(cubes, "z");
+      gsap.set(cubes, { z: 0 });
+      stopBreathing();
+    },
+  };
+}
+
 function initProjects() {
   if (mobile) return;
   const section = document.querySelector(".projects");
@@ -390,55 +602,71 @@ function initProjects() {
   const art = preview.querySelector(".project-art");
   const detail = preview.querySelector(".project-detail");
   const date = preview.querySelector(".project-preview__date");
-  const cursor = document.querySelector(".project-cursor");
   const projectDetails = [
     {
       title: "Nébula Website",
       description: "Direction créative, interface responsive et animations fluides pour une présence web immersive.",
       stack: "Creative development / Motion / Front-end",
+      image: "./udl.jpg",
+      tint: "rgba(93, 84, 156, 0.26)",
     },
     {
       title: "Anima",
       description: "Prototype interactif centré sur les transitions, les micro-interactions et la sensation de navigation.",
       stack: "Interaction design / GSAP / UI",
+      image: "/home-frames/intro-020.jpg",
+      tint: "rgba(163, 115, 211, 0.28)",
     },
     {
       title: "Osmose App",
       description: "Interface produit claire pour organiser des contenus, comparer des états et accélérer les décisions.",
       stack: "Product design / Dashboard / UX",
+      image: "/home-frames/intro-043.jpg",
+      tint: "rgba(0, 150, 214, 0.24)",
     },
     {
       title: "Zenith",
       description: "Expérience éditoriale verticale avec rythme typographique, sections immersives et narration scrollée.",
       stack: "Editorial / Scroll experience / Art direction",
+      image: "/home-frames/intro-064.jpg",
+      tint: "rgba(217, 164, 65, 0.24)",
     },
     {
       title: "Monoform",
       description: "Système visuel minimaliste autour de composants réutilisables et d’une grille très structurée.",
       stack: "Design system / Components / Front-end",
+      image: "/home-frames/intro-087.jpg",
+      tint: "rgba(126, 58, 99, 0.28)",
     },
     {
       title: "ChromaBlock",
       description: "Exploration colorée mêlant blocs dynamiques, transitions rapides et interactions au pointeur.",
       stack: "Creative coding / Canvas / Motion",
+      image: "/home-frames/intro-110.jpg",
+      tint: "rgba(235, 153, 152, 0.28)",
     },
     {
       title: "Symphony",
       description: "Composition web rythmée par le mouvement, pensée pour donner une lecture fluide d’un contenu dense.",
       stack: "Motion system / Layout / Performance",
+      image: "/about-frames/me-018.jpg",
+      tint: "rgba(93, 84, 156, 0.22)",
     },
     {
       title: "Echo",
       description: "Landing interactive avec feedback visuel immédiat, détails soignés et navigation expressive.",
       stack: "Landing page / Interaction / Front-end",
+      image: "/about-frames/me-074.jpg",
+      tint: "rgba(0, 150, 214, 0.2)",
     },
   ];
+  projectDetails.forEach(({ image }) => {
+    const preload = new Image();
+    preload.src = image;
+  });
+  const cubePreview = createProjectCubePreview(art, projectDetails[0]);
   let current = -1;
   let visible = false;
-  let targetRX = 0;
-  let targetRY = 0;
-  let rx = 0;
-  let ry = 0;
 
   const updateDetail = (index) => {
     const data = projectDetails[index];
@@ -453,7 +681,8 @@ function initProjects() {
     items.forEach((item, itemIndex) => item.classList.toggle("is-active", itemIndex === index));
     date.textContent = items[index].dataset.date;
     updateDetail(index);
-    gsap.fromTo(art, { opacity: 0, scale: 0.96 }, { opacity: 1, scale: 1, duration: 0.35 });
+    cubePreview.show(projectDetails[index], index);
+    gsap.fromTo(art, { scale: 0.985 }, { scale: 1, duration: 0.35, ease: "power2.out" });
     detail.classList.add("is-visible");
     gsap.fromTo(detail, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.28 });
     current = index;
@@ -465,6 +694,7 @@ function initProjects() {
     end: "bottom 20%",
     onToggle: ({ isActive }) => {
       visible = isActive;
+      cubePreview.setActive(isActive);
       gsap.to(preview, { opacity: isActive ? 1 : 0, duration: 0.35 });
     },
   });
@@ -488,6 +718,8 @@ function initProjects() {
   };
 
   items.forEach((item, index) => {
+    item.addEventListener("mouseenter", () => activate(index));
+    item.addEventListener("focus", () => activate(index));
     item.addEventListener("click", () => {
       updateDetail(index);
       activate(index);
@@ -499,24 +731,6 @@ function initProjects() {
   window.addEventListener("scroll", updateActive, { passive: true });
   lenis?.on("scroll", updateActive);
   updateActive();
-
-  preview.addEventListener("mouseenter", () => gsap.to(cursor, { opacity: 1, duration: 0.25 }));
-  preview.addEventListener("mouseleave", () => gsap.to(cursor, { opacity: 0, duration: 0.25 }));
-  window.addEventListener("pointermove", (event) => {
-    gsap.to(cursor, { x: event.clientX, y: event.clientY, duration: 0.25 });
-    const rect = preview.getBoundingClientRect();
-    const pointerX = Math.min(1, Math.max(0, (event.clientX - rect.left) / rect.width));
-    const pointerY = Math.min(1, Math.max(0, (event.clientY - rect.top) / rect.height));
-    targetRY = (pointerX - 0.5) * 11;
-    targetRX = -(pointerY - 0.5) * 8;
-  });
-
-  gsap.ticker.add(() => {
-    if (!visible) return;
-    rx += (targetRX - rx) * 0.08;
-    ry += (targetRY - ry) * 0.08;
-    art.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg)`;
-  });
 }
 
 function initGallery() {

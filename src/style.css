@@ -495,14 +495,15 @@ em {
 
 .project-preview {
   position: fixed;
-  right: 7vw;
+  right: 15vw;
   top: 50%;
   z-index: 925;
   width: min(30vw, 440px);
   opacity: 0;
   pointer-events: none;
   transform: translateY(-50%);
-  perspective: 900px;
+  perspective: 980px;
+  perspective-origin: 50% 45%;
 }
 
 .project-preview__meta {
@@ -519,18 +520,121 @@ em {
 .project-art {
   position: relative;
   aspect-ratio: 4 / 3;
-  overflow: hidden;
-  background: #050505;
+  overflow: visible;
+  background: transparent;
   transform-style: preserve-3d;
+  --cube-cols: 8;
+  --cube-rows: 6;
+  --cube-z: 30px;
+  --cube-front: url("./udl.jpg");
+  --cube-back: url("./udl.jpg");
+  --tile-bg-size-x: 800%;
+  --tile-bg-size-y: 600%;
+  --project-tint: rgba(93, 84, 156, 0.24);
+}
+
+.project-art::before {
+  display: none;
+}
+
+.project-art::after {
+  display: none;
 }
 
 .project-art__image {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
   display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
   object-position: center;
   filter: saturate(0.95) contrast(1.08);
+  transition: opacity 0.25s ease;
+}
+
+.project-art.is-cubes-ready .project-art__image {
+  opacity: 1;
+}
+
+.project-cube-grid {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: repeat(var(--cube-cols), minmax(0, 1fr));
+  grid-template-rows: repeat(var(--cube-rows), minmax(0, 1fr));
+  overflow: visible;
+  transform-style: preserve-3d;
+  transform: translateZ(0);
+}
+
+.project-cube-tile {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  transform-style: preserve-3d;
+  transform-origin: 50% 50%;
+  will-change: transform;
+}
+
+.project-cube {
+  position: absolute;
+  inset: 0.5px;
+  transform-style: preserve-3d;
+  transform-origin: 50% 50%;
+}
+
+.project-cube-face {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-repeat: no-repeat;
+  background-size: var(--tile-bg-size-x) var(--tile-bg-size-y);
+  background-position: var(--tile-bg-x) var(--tile-bg-y);
+  backface-visibility: hidden;
+  outline: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.project-cube-face--front {
+  background-image: var(--cube-front);
+  transform: translateZ(var(--cube-z));
+}
+
+.project-cube-face--back {
+  transform: rotateY(180deg) translateZ(var(--cube-z));
+}
+
+.project-cube-face--left,
+.project-cube-face--right,
+.project-cube-face--top,
+.project-cube-face--bottom {
+  background-image: none;
+  background-size: auto;
+  background-position: center;
+}
+
+.project-cube-face--left {
+  transform: rotateY(-90deg) translateZ(var(--cube-z));
+  filter: brightness(0.72);
+}
+
+.project-cube-face--right {
+  transform: rotateY(90deg) translateZ(var(--cube-z));
+  filter: brightness(0.9);
+}
+
+.project-cube-face--top {
+  transform: rotateX(90deg) translateZ(var(--cube-z));
+  filter: brightness(1.08);
+}
+
+.project-cube-face--bottom {
+  transform: rotateX(-90deg) translateZ(var(--cube-z));
+  filter: brightness(0.66);
 }
 
 .project-detail {
