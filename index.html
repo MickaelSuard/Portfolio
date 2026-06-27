@@ -1,210 +1,223 @@
 <!doctype html>
 <html lang="fr">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta
-      name="description"
-      content="Mickael — creative developer, interfaces web, animation et expériences interactives."
-    />
-    <meta name="theme-color" content="#0a0a0a" />
-    <title>Mickael — Creative Developer</title>
-  </head>
-  <body>
-    <div class="intro-bg"></div>
-    <div class="intro-name" aria-hidden="true">
-      <span class="intro-name__first-group">
-        <span class="intro-name__first">M</span><span class="intro-name__first-rest">ickael</span>
-      </span>
-      <span class="intro-name__last-group">
-        <span class="intro-name__last">Suard</span>
-      </span>
-    </div>
-    <div class="transition-panels" aria-hidden="true">
-      <i class="transition-panels__dark"></i>
-      <i class="transition-panels__red"></i>
-    </div>
 
-    <div class="world-viewport" aria-hidden="true">
-      <div class="world-media">
-        <img class="world-media__asset" src="./udl.jpg" alt="" />
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Mickael — Développeur, interfaces web, animation et expériences interactives." />
+  <meta name="theme-color" content="#0a0a0a" />
+  <title>Mickael — Développeur</title>
+</head>
+
+<body>
+  <div class="intro-bg"></div>
+  <div class="intro-name" aria-hidden="true">
+    <span class="intro-name__first-group">
+      <span class="intro-name__first">M</span><span class="intro-name__first-rest">ickael</span>
+    </span>
+    <span class="intro-name__last-group">
+      <span class="intro-name__last">Suard</span>
+    </span>
+  </div>
+  <div class="transition-panels" aria-hidden="true">
+    <i class="transition-panels__dark"></i>
+    <i class="transition-panels__red"></i>
+  </div>
+
+  <div class="world-viewport" aria-hidden="true">
+    <div class="world-media">
+      <img class="world-media__asset" src="./udl.jpg" alt="" />
+    </div>
+    <div class="world-corners"><i></i><i></i><i></i><i></i></div>
+    <div class="world-shade"></div>
+    <p class="world-phrase">Basically, I make websites.</p>
+  </div>
+
+  <div class="scroll-pct">(0)</div>
+  <aside class="scroll-timeline" aria-hidden="true">
+    <span class="scroll-timeline__label">Home</span>
+    <div class="scroll-timeline__bar"></div>
+  </aside>
+
+  <main>
+    <section class="hero-scroll" id="home">
+      <div class="hero">
+        <canvas class="hero-gradient" aria-hidden="true"></canvas>
+
+        <div class="hero-bar">
+          <span>V1.0</span>
+          <nav aria-label="Réseaux sociaux">
+            <a href="#">GitHub</a><i>/</i><a href="#">LinkedIn</a><i>/</i><a href="#">Instagram</a>
+          </nav>
+          <nav aria-label="Navigation">
+            <a href="#projects">Work</a><a href="#about">Info</a><a href="#contact">Contact</a>
+          </nav>
+        </div>
+        <div class="hero-line"></div>
       </div>
-      <div class="world-corners"><i></i><i></i><i></i><i></i></div>
-      <div class="world-shade"></div>
-      <p class="world-phrase">Basically, I make websites.</p>
+    </section>
+
+    <div class="dark-content">
+      <svg class="fluid-line" viewBox="0 0 1400 2500" preserveAspectRatio="none" aria-hidden="true">
+        <path
+          d="M1550 -120 C1040 80 950 430 1230 650 C1480 845 1220 1090 730 1070 C255 1050 30 1320 290 1620 C545 1910 750 1810 910 2050 C1060 2280 1175 2440 1390 2490" />
+      </svg>
+
+      <section class="about" id="about">
+        <div class="about-photo" aria-hidden="true">
+          <div class="about-media">
+            <img class="about-media__asset" src="/about-frames/me-001.jpg" alt="" />
+          </div>
+        </div>
+
+        <p class="about-lead split-words">
+          Je conçois des projets sur mesure,
+          en mêlant <em>créativité</em>, <em>expertise</em> et <em>innovation</em>.
+        </p>
+
+        <div class="about-small">
+          <p>
+            Je m’appelle Mickael. Développeur créatif, je produis des expériences digitales
+            mémorables et cherche une symbiose entre l’art et l’information.
+          </p>
+          <a href="#skills" class="char-link">INFO</a>
+        </div>
+
+      </section>
+
+      <section class="projects" id="projects">
+        <div class="projects-list">
+          <button class="project-item" data-index="0" data-date="01 2026">Nébula Website</button>
+          <button class="project-item" data-index="1" data-date="04 2026">Anima</button>
+          <button class="project-item" data-index="2" data-date="08 2025">Osmose App</button>
+          <button class="project-item" data-index="3" data-date="11 2025">Zenith</button>
+          <button class="project-item" data-index="4" data-date="02 2026">Monoform</button>
+          <button class="project-item" data-index="5" data-date="03 2026">ChromaBlock</button>
+          <button class="project-item" data-index="6" data-date="05 2026">Symphony</button>
+          <button class="project-item" data-index="7" data-date="06 2026">Echo</button>
+        </div>
+
+        <div class="project-preview">
+          <div class="project-preview__meta">
+            <span class="project-preview__date">01 2026</span><span>Preview</span>
+          </div>
+          <div class="project-art project-art--0">
+            <div class="project-art__screen"><span>N</span></div>
+            <i></i><i></i><i></i>
+          </div>
+        </div>
+        <div class="project-cursor">See project</div>
+      </section>
     </div>
 
-    <div class="scroll-pct">(0)</div>
-    <aside class="scroll-timeline" aria-hidden="true">
-      <span class="scroll-timeline__label">Home</span>
-      <div class="scroll-timeline__bar"></div>
-    </aside>
-
-    <main>
-      <section class="hero-scroll" id="home">
-        <div class="hero">
-          <canvas class="hero-gradient" aria-hidden="true"></canvas>
-
-          <div class="hero-bar">
-            <span>V1.0</span>
-            <nav aria-label="Réseaux sociaux">
-              <a href="#">GitHub</a><i>/</i><a href="#">LinkedIn</a><i>/</i><a href="#">Instagram</a>
-            </nav>
-            <nav aria-label="Navigation">
-              <a href="#projects">Work</a><a href="#about">Info</a><a href="#contact">Contact</a>
-            </nav>
-          </div>
-          <div class="hero-line"></div>
+    <section class="circle-gallery" id="gallery">
+      <div class="circle-gallery__pin">
+        <div class="orbit">
+          <figure class="orbit-card orbit-card--0"><img src="./udl.jpg" alt="" /></figure>
+          <figure class="orbit-card orbit-card--1"><img src="./udl.jpg" alt="" /></figure>
+          <figure class="orbit-card orbit-card--2"><img src="./udl.jpg" alt="" /></figure>
+          <figure class="orbit-card orbit-card--3"><img src="./udl.jpg" alt="" /></figure>
+          <figure class="orbit-card orbit-card--4"><img src="./udl.jpg" alt="" /></figure>
         </div>
-      </section>
+        <p class="gallery-phrase split-words">
+          Chaque projet est une occasion d’<em>apprendre</em>, d’<em>expérimenter</em>
+          et de repousser mes limites.
+        </p>
+      </div>
+    </section>
 
-      <div class="dark-content">
-        <svg class="fluid-line" viewBox="0 0 1400 2500" preserveAspectRatio="none" aria-hidden="true">
-          <path d="M1550 -120 C1040 80 950 430 1230 650 C1480 845 1220 1090 730 1070 C255 1050 30 1320 290 1620 C545 1910 750 1810 910 2050 C1060 2280 1175 2440 1390 2490" />
-        </svg>
-
-        <section class="about" id="about">
-          <div class="about-photo" aria-hidden="true">
-            <div class="about-media">
-              <img class="about-media__asset" src="/about-frames/me-001.jpg" alt="" />
-            </div>
-          </div>
-
-          <p class="about-lead split-words">
-            En tant que <em>creative developer</em>, je conçois des expériences web sur mesure,
-            en mêlant précision technique et <em>émotion</em>.
-          </p>
-
-          <div class="about-small">
-            <p>
-              Je m’appelle Mickael. Développeur créatif, je produis des expériences digitales
-              mémorables et cherche une symbiose entre l’art et l’information.
-            </p>
-            <a href="#skills" class="char-link">INFO</a>
-          </div>
-
-        </section>
-
-        <section class="projects" id="projects">
-          <div class="projects-list">
-            <button class="project-item" data-index="0" data-date="01 2026">Nébula Website</button>
-            <button class="project-item" data-index="1" data-date="04 2026">Anima</button>
-            <button class="project-item" data-index="2" data-date="08 2025">Osmose App</button>
-            <button class="project-item" data-index="3" data-date="11 2025">Zenith</button>
-            <button class="project-item" data-index="4" data-date="02 2026">Monoform</button>
-            <button class="project-item" data-index="5" data-date="03 2026">ChromaBlock</button>
-            <button class="project-item" data-index="6" data-date="05 2026">Symphony</button>
-            <button class="project-item" data-index="7" data-date="06 2026">Echo</button>
-          </div>
-
-          <div class="project-preview">
-            <div class="project-preview__meta">
-              <span class="project-preview__date">01 2026</span><span>Preview</span>
-            </div>
-            <div class="project-art project-art--0">
-              <div class="project-art__screen"><span>N</span></div>
-              <i></i><i></i><i></i>
-            </div>
-          </div>
-          <div class="project-cursor">See project</div>
-        </section>
+    <section class="skills" id="skills">
+      <div class="skills-left">
+        <span class="skills-kicker">Compétences</span>
+        <h2>
+          Développeur créatif spécialisé dans les interfaces, l’animation et les
+          expériences web immersives.
+        </h2>
+        <div class="skills-rule"></div>
       </div>
 
-      <section class="circle-gallery" id="gallery">
-        <div class="circle-gallery__pin">
-          <div class="orbit">
-            <figure class="orbit-card orbit-card--0"><img src="./udl.jpg" alt="" /></figure>
-            <figure class="orbit-card orbit-card--1"><img src="./udl.jpg" alt="" /></figure>
-            <figure class="orbit-card orbit-card--2"><img src="./udl.jpg" alt="" /></figure>
-            <figure class="orbit-card orbit-card--3"><img src="./udl.jpg" alt="" /></figure>
-            <figure class="orbit-card orbit-card--4"><img src="./udl.jpg" alt="" /></figure>
-          </div>
-          <p class="gallery-phrase split-words">
-            Chaque projet est une occasion d’<em>apprendre</em>, d’<em>expérimenter</em>
-            et de repousser mes limites.
-          </p>
-        </div>
-      </section>
-
-      <section class="skills" id="skills">
-        <div class="skills-left">
-          <span class="skills-kicker">Compétences</span>
-          <h2>
-            Développeur créatif spécialisé dans les interfaces, l’animation et les
-            expériences web immersives.
-          </h2>
-          <div class="skills-rule"></div>
-        </div>
-
-        <div class="skills-right">
-          <div class="skill-group is-open">
-            <button><span>Frontend</span><i></i></button>
-            <div class="skill-body"><p>HTML · CSS · JavaScript · TypeScript · React · Next.js</p></div>
-          </div>
-          <div class="skill-group">
-            <button><span>Animation & 3D</span><i></i></button>
-            <div class="skill-body"><p>GSAP · Lenis · Three.js · WebGL · GLSL · Blender</p></div>
-          </div>
-          <div class="skill-group">
-            <button><span>Backend</span><i></i></button>
-            <div class="skill-body"><p>Node.js · Express · Python · APIs · Supabase</p></div>
-          </div>
-          <div class="skill-group">
-            <button><span>Bases de données</span><i></i></button>
-            <div class="skill-body"><p>PostgreSQL · MySQL · MongoDB · Redis</p></div>
-          </div>
-          <div class="skill-group">
-            <button><span>DevOps & Outils</span><i></i></button>
-            <div class="skill-body"><p>Git · Docker · Vercel · Cloudflare · CI/CD</p></div>
-          </div>
-          <div class="skill-group">
-            <button><span>Design</span><i></i></button>
-            <div class="skill-body"><p>Figma · Direction artistique · Prototypage · Typographie</p></div>
+      <div class="skills-right">
+        <div class="skill-group is-open">
+          <button><span>Frontend</span><i></i></button>
+          <div class="skill-body">
+            <p>HTML · CSS · JavaScript · TypeScript · React · Next.js</p>
           </div>
         </div>
-      </section>
-
-      <section class="contact" id="contact">
-        <div class="contact-pin">
-          <div class="contact-blob"></div>
-          <h2>Contact</h2>
-
-          <p class="contact-copy contact-copy--one">
-            Disponible pour une <em>alternance</em>, une mission freelance ou une collaboration
-            ambitieuse.
-          </p>
-          <div class="contact-frame contact-frame--one">
-            <div class="contact-art contact-art--one"></div><i></i><i></i><i></i><i></i>
-          </div>
-
-          <p class="contact-copy contact-copy--two">
-            Partout dans le monde, sur <em>vos projets exigeants</em> et vos expériences
-            digitales singulières.
-          </p>
-          <div class="contact-frame contact-frame--two">
-            <div class="contact-art contact-art--two"></div><i></i><i></i><i></i><i></i>
-          </div>
-
-          <div class="contact-bottom">
-            <nav><a href="#">GitHub</a><a href="#">LinkedIn</a><a href="#">Instagram</a></nav>
-            <a href="mailto:hello@mickael.dev">hello@mickael.dev</a>
+        <div class="skill-group">
+          <button><span>Animation & 3D</span><i></i></button>
+          <div class="skill-body">
+            <p>GSAP · Lenis · Three.js · WebGL · GLSL · Blender</p>
           </div>
         </div>
-      </section>
+        <div class="skill-group">
+          <button><span>Backend</span><i></i></button>
+          <div class="skill-body">
+            <p>Node.js · Express · Python · APIs · Supabase</p>
+          </div>
+        </div>
+        <div class="skill-group">
+          <button><span>Bases de données</span><i></i></button>
+          <div class="skill-body">
+            <p>PostgreSQL · MySQL · MongoDB · Redis</p>
+          </div>
+        </div>
+        <div class="skill-group">
+          <button><span>DevOps & Outils</span><i></i></button>
+          <div class="skill-body">
+            <p>Git · Docker · Vercel · Cloudflare · CI/CD</p>
+          </div>
+        </div>
+        <div class="skill-group">
+          <button><span>Design</span><i></i></button>
+          <div class="skill-body">
+            <p>Figma · Direction artistique · Prototypage · Typographie</p>
+          </div>
+        </div>
+      </div>
+    </section>
 
-      <div class="footer-transition"></div>
-      <footer class="footer">
-        <div class="footer-top">
-          <div><a href="mailto:hello@mickael.dev">hello@mickael.dev</a><span>© 2026</span></div>
+    <section class="contact" id="contact">
+      <div class="contact-pin">
+        <div class="contact-blob"></div>
+        <h2>Contact</h2>
+
+        <p class="contact-copy contact-copy--one">
+          Disponible pour une <em>alternance</em>, une mission freelance ou une collaboration
+          ambitieuse.
+        </p>
+        <div class="contact-frame contact-frame--one">
+          <div class="contact-art contact-art--one"></div><i></i><i></i><i></i><i></i>
+        </div>
+
+        <p class="contact-copy contact-copy--two">
+          Partout dans le monde, sur <em>vos projets exigeants</em> et vos expériences
+          digitales singulières.
+        </p>
+        <div class="contact-frame contact-frame--two">
+          <div class="contact-art contact-art--two"></div><i></i><i></i><i></i><i></i>
+        </div>
+
+        <div class="contact-bottom">
           <nav><a href="#">GitHub</a><a href="#">LinkedIn</a><a href="#">Instagram</a></nav>
-          <nav><a href="#projects">Work</a><a href="#about">Info</a><a href="#contact">Contact</a></nav>
+          <a href="mailto:hello@mickael.dev">hello@mickael.dev</a>
         </div>
-        <div class="ascii ascii--left" aria-hidden="true"></div>
-        <div class="ascii ascii--right" aria-hidden="true"></div>
-        <div class="footer-name"><span>Mickael</span><em>Suard</em><i>.</i></div>
-      </footer>
-    </main>
+      </div>
+    </section>
 
-    <script type="module" src="/src/main.js"></script>
-  </body>
+    <div class="footer-transition"></div>
+    <footer class="footer">
+      <div class="footer-top">
+        <div><a href="mailto:hello@mickael.dev">hello@mickael.dev</a><span>© 2026</span></div>
+        <nav><a href="#">GitHub</a><a href="#">LinkedIn</a><a href="#">Instagram</a></nav>
+        <nav><a href="#projects">Work</a><a href="#about">Info</a><a href="#contact">Contact</a></nav>
+      </div>
+      <div class="ascii ascii--left" aria-hidden="true"></div>
+      <div class="ascii ascii--right" aria-hidden="true"></div>
+      <div class="footer-name"><span>Mickael</span><em>Suard</em><i>.</i></div>
+    </footer>
+  </main>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+
 </html>
