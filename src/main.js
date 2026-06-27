@@ -2,6 +2,7 @@ import "./style.css";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Lenis from "lenis";
+import Matter from "matter-js";
 import { inject } from "@vercel/analytics";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -807,14 +808,178 @@ function initGallery() {
   renderGallery(0);
 }
 
+function createSkillPillPhysics(stage) {
+  if (!stage) return null;
+  const pills = gsap.utils.toArray(".skill-pill", stage);
+  if (!pills.length) return null;
+
+  if (reduced) {
+    return {
+      prepare: () => {},
+      drop: () => {},
+      stop: () => {},
+      resize: () => {},
+    };
+  }
+
+  const { Engine, Runner, Bodies, Body, Composite, Events } = Matter;
+  let engine = null;
+  let runner = null;
+  let bodies = [];
+  let settleTimer = null;
+  let resizeTimer = null;
+  let hasPlayed = false;
+
+  stage.classList.add("is-physics-ready");
+
+  function stop() {
+    if (runner) {
+      Runner.stop(runner);
+      runner = null;
+    }
+    window.clearTimeout(settleTimer);
+    settleTimer = null;
+  }
+
+  function sync() {
+    bodies.forEach(({ body, element }) => {
+      element.style.transform = `translate(-50%, -50%) translate3d(${body.position.x.toFixed(2)}px, ${body.position.y.toFixed(2)}px, 0) rotate(${body.angle.toFixed(3)}rad)`;
+    });
+  }
+
+  function clearWorld() {
+    stop();
+    stage.classList.remove("has-physics-position");
+    if (!engine) return;
+    Events.off(engine, "afterUpdate", sync);
+    Composite.clear(engine.world, false, true);
+    Engine.clear(engine);
+    engine = null;
+    bodies = [];
+  }
+
+  function measureStage() {
+    const rect = stage.getBoundingClientRect();
+    return {
+      width: Math.max(rect.width, 260),
+      height: Math.max(rect.height, mobile ? 185 : 145),
+    };
+  }
+
+  function buildWorld() {
+    clearWorld();
+
+    const { width, height } = measureStage();
+    const wall = 80;
+    const floorY = height - 1;
+    engine = Engine.create({
+      gravity: {
+        x: 0,
+        y: 1,
+        scale: 0.0019,
+      },
+    });
+    engine.positionIterations = 8;
+    engine.velocityIterations = 6;
+
+    const boundaries = [
+      Bodies.rectangle(width / 2, floorY + wall / 2, width + wall * 2, wall, { isStatic: true }),
+      Bodies.rectangle(-wall / 2, height / 2, wall, height * 3, { isStatic: true }),
+      Bodies.rectangle(width + wall / 2, height / 2, wall, height * 3, { isStatic: true }),
+    ];
+
+    bodies = pills.map((pill, index) => {
+      const pillWidth = pill.offsetWidth || 110;
+      const pillHeight = pill.offsetHeight || 44;
+      const lane = width / (pills.length + 1);
+      const stagger = index % 2 === 0 ? -width * 0.035 : width * 0.035;
+      const x = Math.max(pillWidth / 2, Math.min(width - pillWidth / 2, lane * (index + 1) + stagger));
+      const y = -70 - index * (pillHeight + 14);
+      const body = Bodies.rectangle(x, y, pillWidth, pillHeight, {
+        chamfer: { radius: pillHeight / 2 },
+        restitution: 0.42,
+        friction: 0.82,
+        frictionStatic: 0.92,
+        frictionAir: 0.018,
+        density: 0.0015,
+      });
+
+      Body.setAngle(body, gsap.utils.random(-0.38, 0.38));
+      Body.setAngularVelocity(body, gsap.utils.random(-0.055, 0.055));
+      Body.setVelocity(body, {
+        x: gsap.utils.random(-1.1, 1.1),
+        y: gsap.utils.random(0.25, 1.25),
+      });
+
+      return { body, element: pill };
+    });
+
+    Composite.add(engine.world, [...boundaries, ...bodies.map(({ body }) => body)]);
+    Events.on(engine, "afterUpdate", sync);
+    sync();
+    stage.classList.add("has-physics-position");
+  }
+
+  function prepare() {
+    if (!stage.closest(".skill-group")?.classList.contains("is-open")) return;
+    buildWorld();
+  }
+
+  function drop() {
+    if (!stage.closest(".skill-group")?.classList.contains("is-open")) return;
+    if (!engine) buildWorld();
+    runner = Runner.create();
+    Runner.run(runner, engine);
+    hasPlayed = true;
+    window.clearTimeout(settleTimer);
+    settleTimer = window.setTimeout(stop, 5600);
+  }
+
+  function resize() {
+    if (!hasPlayed) return;
+    window.clearTimeout(resizeTimer);
+    resizeTimer = window.setTimeout(drop, 140);
+  }
+
+  window.addEventListener("resize", resize);
+
+  return { prepare, drop, stop, resize };
+}
+
 function initSkills() {
   document.querySelectorAll(".skill-group").forEach((group) => {
     const button = group.querySelector("button");
     const body = group.querySelector(".skill-body");
-    if (group.classList.contains("is-open")) gsap.set(body, { height: "auto" });
+    const physics = createSkillPillPhysics(group.querySelector("[data-skill-pills]"));
+    const setOpen = (open, immediate = false) => {
+      group.classList.toggle("is-open", open);
+      button.setAttribute("aria-expanded", String(open));
+      if (!open) physics?.stop();
+      if (open && !immediate) physics?.prepare();
+      gsap.to(body, {
+        height: open ? "auto" : 0,
+        duration: immediate ? 0 : 0.5,
+        ease: "power3.inOut",
+        onComplete: () => {
+          if (open && !immediate) physics?.drop();
+          ScrollTrigger.refresh();
+        },
+      });
+    };
+
+    setOpen(group.classList.contains("is-open"), true);
+
     button.addEventListener("click", () => {
-      const open = group.classList.toggle("is-open");
-      gsap.to(body, { height: open ? "auto" : 0, duration: 0.5, ease: "power3.inOut" });
+      setOpen(!group.classList.contains("is-open"));
+    });
+
+    ScrollTrigger.create({
+      trigger: group,
+      start: "top 78%",
+      once: true,
+      onEnter: () => {
+        if (group.classList.contains("is-open")) physics?.drop();
+      },
     });
   });
 }
