@@ -9,6 +9,30 @@ const mobile = window.matchMedia("(max-width: 768px)").matches;
 const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const previewMode = new URLSearchParams(window.location.search).has("preview");
 
+let heroChromeReady = false;
+let heroChromeVisible = false;
+
+function setHeroChromeVisible(visible, immediate = false) {
+  if (heroChromeVisible === visible && !immediate) return;
+  heroChromeVisible = visible;
+  gsap.set(".hero-bar", { display: "flex" });
+  gsap.set(".hero-line", { display: "block" });
+  gsap.to(".hero-bar", {
+    autoAlpha: visible ? 1 : 0,
+    clipPath: visible ? "inset(0 0 0% 0)" : "inset(0 0 100% 0)",
+    duration: immediate ? 0 : 0.45,
+    ease: "power3.inOut",
+    overwrite: true,
+  });
+  gsap.to(".hero-line", {
+    autoAlpha: visible ? 1 : 0,
+    scaleX: visible ? 1 : 0,
+    duration: immediate ? 0 : 0.45,
+    ease: "power3.inOut",
+    overwrite: true,
+  });
+}
+
 function initLenis() {
   if (reduced || previewMode) return null;
   const lenis = new Lenis({ duration: 1.15, smoothWheel: true, wheelMultiplier: 0.9 });
@@ -58,13 +82,15 @@ function createGradientCanvas() {
   function draw(time) {
     pointer.x += (target.x - pointer.x) * 0.035;
     pointer.y += (target.y - pointer.y) * 0.035;
-    context.fillStyle = "#080808";
+    context.fillStyle = "#2c1838";
     context.fillRect(0, 0, width, height);
 
     const gradients = [
-      [0.76 + Math.sin(time * 0.00018) * 0.08, 0.18, width * 0.72, "#ff2b18"],
-      [0.26, 0.2 + Math.cos(time * 0.00013) * 0.08, width * 0.62, "#9f1712"],
-      [pointer.x, pointer.y, width * 0.34, "#ff6c30"],
+      [0.78 + Math.sin(time * 0.00018) * 0.06, 0.18, width * 0.78, "#eb9998"],
+      [0.25, 0.24 + Math.cos(time * 0.00013) * 0.06, width * 0.68, "#5d549c"],
+      [0.54, 0.45 + Math.sin(time * 0.00016) * 0.04, width * 0.56, "#6f70a2"],
+      [0.62, 0.74 + Math.sin(time * 0.00016) * 0.04, width * 0.58, "#7e3a63"],
+      [pointer.x, pointer.y, width * 0.3, "#a373d3"],
     ];
 
     context.globalCompositeOperation = "screen";
@@ -77,7 +103,7 @@ function createGradientCanvas() {
       context.fillRect(0, 0, width, height);
     });
     context.globalCompositeOperation = "source-over";
-    context.fillStyle = "rgba(0,0,0,.17)";
+    context.fillStyle = "rgba(44, 24, 56, .18)";
     context.fillRect(0, 0, width, height);
     requestAnimationFrame(draw);
   }
@@ -105,7 +131,7 @@ function splitElementWords(element) {
 }
 
 function splitIntroChars() {
-  document.querySelectorAll(".intro-name__first, .intro-name__first-rest, .intro-name__last, .intro-name__dot").forEach((element) => {
+  document.querySelectorAll(".intro-name__first, .intro-name__first-rest, .intro-name__last").forEach((element) => {
     const chars = [...element.textContent];
     element.textContent = "";
     chars.forEach((char) => {
@@ -120,41 +146,45 @@ function splitIntroChars() {
 
 function initIntro() {
   splitIntroChars();
+  const heroBar = document.querySelector(".hero-bar");
+  if (heroBar && heroBar.parentElement !== document.body) document.body.append(heroBar);
+  const heroLine = document.querySelector(".hero-line");
+  if (heroLine && heroLine.parentElement !== document.body) document.body.append(heroLine);
   const chars = gsap.utils.toArray(".intro-char");
   gsap.set(chars, { yPercent: 115 });
-  gsap.set(".intro-name__dot", { opacity: 0 });
-  gsap.set(".hero", { opacity: 0 });
+  gsap.set(".hero", { opacity: 1 });
+  setHeroChromeVisible(false, true);
 
   if (previewMode || reduced) {
     gsap.set(chars, { yPercent: 0 });
-    gsap.set(".intro-name__dot", { opacity: 1 });
     gsap.set(".intro-bg, .transition-panels", { display: "none" });
-    gsap.set(".hero", { opacity: 1 });
-    gsap.set(".hero-tagline, .hero-bar", { opacity: 1, clipPath: "inset(0 0 0 0)" });
-    gsap.set(".hero-line", { opacity: 1, scaleX: 1 });
+    gsap.set(".hero-tagline", { opacity: 1, clipPath: "inset(0 0 0 0)" });
+    heroChromeReady = true;
+    setHeroChromeVisible(true, true);
     return;
   }
 
   const timeline = gsap.timeline({ delay: 0.2 });
   timeline
     .to(chars, { yPercent: 0, duration: 0.45, stagger: { each: 0.018, from: "center" }, ease: "power3.out" })
-    .to(".intro-name__dot", { opacity: 1, duration: 0.25 })
     .to({}, { duration: 0.3 })
     .to(".transition-panels__dark", { yPercent: -100, duration: 0.45, ease: "power3.inOut" })
     .to(".transition-panels__red", { yPercent: -100, duration: 0.45, ease: "power3.inOut" }, "-=0.3")
     .set(".intro-bg", { display: "none" })
-    .set(".hero", { opacity: 1 })
     .to(".transition-panels__red", { yPercent: -200, duration: 0.55, ease: "power3.inOut" }, "+=0.05")
     .to(".transition-panels__dark", { yPercent: -200, duration: 0.55, ease: "power3.inOut" }, "-=0.4")
     .to(".hero-tagline", { opacity: 1, clipPath: "inset(0 0 0% 0)", duration: 1, ease: "power3.inOut" }, "-=0.2")
-    .to(".hero-bar", { opacity: 1, clipPath: "inset(0 0 0% 0)", duration: 1, ease: "power3.inOut" }, "-=0.75")
-    .to(".hero-line", { opacity: 1, scaleX: 1, duration: 1, ease: "power3.inOut" }, "<");
+    .call(() => {
+      heroChromeReady = true;
+      setHeroChromeVisible(true);
+    }, null, "-=0.6");
 }
 
 function initHeroScroll() {
   const name = document.querySelector(".intro-name");
   const firstGroup = document.querySelector(".intro-name__first-group");
   const lastGroup = document.querySelector(".intro-name__last-group");
+  const nameColorTargets = gsap.utils.toArray(".intro-name, .intro-name__first, .intro-name__first-rest, .intro-name__last, .intro-char");
   const viewport = document.querySelector(".world-viewport");
   const media = document.querySelector(".world-media__asset");
   const startWidth = mobile ? 24 : 34;
@@ -177,13 +207,23 @@ function initHeroScroll() {
       end: "bottom bottom",
       scrub: 0.55,
       invalidateOnRefresh: true,
+      onUpdate: ({ progress }) => {
+        if (!heroChromeReady) return;
+        setHeroChromeVisible(progress < 0.88);
+      },
+      onRefresh: ({ progress }) => {
+        if (!heroChromeReady) return;
+        setHeroChromeVisible(progress < 0.88, true);
+      },
     },
   });
 
   timeline
-    .to(".hero-tagline, .hero-bar, .hero-line", { opacity: 0, duration: 0.12, ease: "none" }, 0)
+    .to(".hero-tagline", { opacity: 0, duration: 0.12, ease: "none" }, 0)
     .to(".hero-gradient", { opacity: 1, duration: 0.22, ease: "none" }, 0.05)
     .to(viewport, { opacity: 1, duration: 0.01 }, 0.18)
+    .to(nameColorTargets, { color: "#5d549c", duration: 0.12, ease: "none" }, 0.18)
+    .to(nameColorTargets, { color: "#d9a441", duration: 0.18, ease: "none" }, 0.3)
     .to(name, { "--intro-gap": () => `${window.innerWidth * (mobile ? 0.52 : 0.56)}px`, duration: 0.78, ease: "none" }, 0.18)
     .to(viewport, {
       "--world-width": () => `${window.innerWidth}px`,

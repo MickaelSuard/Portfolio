@@ -4,7 +4,8 @@
   --black: #0a0a0a;
   --white: #f0f0f0;
   --about-bg: #f7f7f7;
-  --red: #ff1e00;
+  --red: linear-gradient(115deg, #5d549c 0%, #a373d3 34%, #eb9998 66%, #7e3a63 100%);
+  --red-solid: #eb9998;
   --muted: rgba(255, 255, 255, 0.22);
 }
 
@@ -67,13 +68,14 @@ em {
   z-index: 1010;
   display: block;
   width: 100%;
+  color: var(--white);
   white-space: nowrap;
   pointer-events: none;
   font-size: clamp(42px, 9vw, 144px);
   line-height: 1;
   letter-spacing: -0.075em;
   transform: translateY(-50%);
-  mix-blend-mode: difference;
+  mix-blend-mode: normal;
   --intro-gap: 16px;
 }
 
@@ -96,23 +98,17 @@ em {
 }
 
 .intro-name__first,
+.intro-name__first-rest,
+.intro-name__last {
+  color: inherit;
+}
+
+.intro-name__first,
 .intro-name__first-rest {
   font-weight: 400;
 }
 
-.intro-name__last,
-.intro-name__dot {
-  font-family: "Instrument Serif", serif;
-  font-style: italic;
-}
 
-.intro-name__last {
-  margin-left: 0;
-}
-
-.intro-name__dot {
-  color: var(--red);
-}
 
 .transition-panels {
   position: fixed;
@@ -158,30 +154,19 @@ em {
   opacity: 0;
 }
 
-.hero-tagline {
-  position: absolute;
-  left: 3rem;
-  top: 3rem;
-  z-index: 2;
-  font-size: 0.85rem;
-  line-height: 1.7;
-  clip-path: inset(0 0 100% 0);
-  opacity: 0;
-  mix-blend-mode: difference;
-}
 
 .hero-bar {
-  position: absolute;
+  position: fixed;
   left: 3rem;
   right: 3rem;
   bottom: 3rem;
-  z-index: 2;
+  z-index: 1020;
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
   clip-path: inset(0 0 100% 0);
   opacity: 0;
-  mix-blend-mode: difference;
+  mix-blend-mode:normal;
   font-size: 1rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -204,11 +189,11 @@ em {
 }
 
 .hero-line {
-  position: absolute;
+  position: fixed;
   left: 3rem;
   right: 3rem;
   bottom: calc(3rem + 2.8rem);
-  z-index: 2;
+  z-index: 1020;
   height: 1px;
   background: rgba(255, 255, 255, 0.5);
   transform: scaleX(0);
@@ -374,7 +359,7 @@ em {
 
 .fluid-line path {
   fill: none;
-  stroke: var(--red);
+  stroke: var(--red-solid);
   stroke-width: 72;
   stroke-linecap: round;
   stroke-linejoin: round;
@@ -976,7 +961,7 @@ em {
 }
 
 .footer-name i {
-  color: var(--red);
+  color: var(--red-solid);
   font: italic 1em/1 "Instrument Serif", serif;
 }
 
@@ -1003,12 +988,6 @@ em {
 }
 
 @media (max-width: 768px) {
-  .hero-tagline {
-    left: 1.5rem;
-    top: 1.5rem;
-    font-size: 0.75rem;
-  }
-
   .hero-bar {
     left: 1.5rem;
     right: 1.5rem;
