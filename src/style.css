@@ -778,22 +778,48 @@ em {
 }
 
 .skills-kicker {
-  display: block;
-  margin-bottom: 2.5rem;
-  font-size: 1.2rem;
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  margin-bottom: 2.2rem;
+  padding: 0 0.82rem;
+  border: 1px solid rgba(10, 10, 10, 0.14);
+  border-radius: 999px;
+  color: rgba(10, 10, 10, 0.68);
+  background: rgba(10, 10, 10, 0.035);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .skills-left h2 {
-  max-width: 760px;
-  font-size: clamp(32px, 3.1vw, 50px);
-  line-height: 1.05;
+  max-width: 680px;
+  font-size: clamp(36px, 4.7vw, 82px);
+  line-height: 0.94;
   font-weight: 800;
-  text-transform: uppercase;
+  letter-spacing: -0.055em;
+}
+
+.skills-left h2 em {
+  display: block;
+  color: rgba(10, 10, 10, 0.56);
+  font-size: 0.88em;
+  line-height: 1;
+}
+
+.skills-intro {
+  max-width: 430px;
+  margin-top: 2rem;
+  color: rgba(10, 10, 10, 0.56);
+  font-size: clamp(1rem, 1.05vw, 1.15rem);
+  line-height: 1.65;
 }
 
 .skills-rule {
   height: 1px;
-  margin: 3rem 0;
+  width: min(100%, 430px);
+  margin: 2.6rem 0 0;
   background: rgba(10, 10, 10, 0.15);
 }
 
@@ -871,22 +897,41 @@ em {
 }
 
 .skill-pill {
+  --chip-bg: #101114;
+  --chip-fg: #f7f7f2;
+  --chip-ring: rgba(10, 10, 10, 0.1);
+  --chip-glow: rgba(10, 10, 10, 0.14);
+  --chip-dot: #7dd3fc;
+  --chip-dot-glow: rgba(125, 211, 252, 0.24);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 44px;
-  padding: 0.65rem 1.05rem;
-  border: 1px solid rgba(10, 10, 10, 0.14);
+  gap: 0.55rem;
+  min-height: 42px;
+  padding: 0.64rem 1rem;
+  border: 1px solid var(--chip-ring);
   border-radius: 999px;
-  color: var(--black);
-  background: var(--white);
-  box-shadow: 0 14px 34px rgba(10, 10, 10, 0.1);
-  font-size: clamp(0.86rem, 0.9vw, 1rem);
+  color: var(--chip-fg);
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.26), rgba(255, 255, 255, 0) 44%),
+    var(--chip-bg);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.32);
+  font-size: clamp(0.78rem, 0.82vw, 0.92rem);
   font-weight: 800;
   line-height: 1;
   white-space: nowrap;
   user-select: none;
   will-change: transform;
+}
+
+.skill-pill::before {
+  content: "";
+  flex: 0 0 auto;
+  width: 0.48rem;
+  height: 0.48rem;
+  border-radius: 50%;
+  background: var(--chip-dot);
+  box-shadow: 0 0 0 3px var(--chip-dot-glow);
 }
 
 .skill-pills.is-physics-ready .skill-pill {
@@ -902,24 +947,48 @@ em {
 }
 
 .skill-pill:nth-child(5n + 1) {
-  color: var(--white);
-  background: var(--black);
+  --chip-bg: #111318;
+  --chip-fg: #f7f7f2;
+  --chip-ring: rgba(255, 255, 255, 0.16);
+  --chip-glow: rgba(10, 10, 10, 0.22);
+  --chip-dot: #78f0c2;
+  --chip-dot-glow: rgba(120, 240, 194, 0.22);
 }
 
 .skill-pill:nth-child(5n + 2) {
-  background: #e7f5ff;
+  --chip-bg: #e7f1ff;
+  --chip-fg: #12304a;
+  --chip-ring: rgba(40, 102, 154, 0.14);
+  --chip-glow: rgba(74, 128, 176, 0.16);
+  --chip-dot: #2488d8;
+  --chip-dot-glow: rgba(36, 136, 216, 0.2);
 }
 
 .skill-pill:nth-child(5n + 3) {
-  background: #fff0df;
+  --chip-bg: #fff1dd;
+  --chip-fg: #4a2912;
+  --chip-ring: rgba(160, 98, 38, 0.16);
+  --chip-glow: rgba(190, 125, 55, 0.16);
+  --chip-dot: #f1862c;
+  --chip-dot-glow: rgba(241, 134, 44, 0.2);
 }
 
 .skill-pill:nth-child(5n + 4) {
-  background: #f0eaff;
+  --chip-bg: #eee8ff;
+  --chip-fg: #2e225f;
+  --chip-ring: rgba(94, 66, 170, 0.15);
+  --chip-glow: rgba(116, 90, 185, 0.15);
+  --chip-dot: #8f63ff;
+  --chip-dot-glow: rgba(143, 99, 255, 0.2);
 }
 
 .skill-pill:nth-child(5n + 5) {
-  background: #e8f6ea;
+  --chip-bg: #e6f7eb;
+  --chip-fg: #14351f;
+  --chip-ring: rgba(42, 122, 66, 0.14);
+  --chip-glow: rgba(53, 138, 78, 0.14);
+  --chip-dot: #29b95f;
+  --chip-dot-glow: rgba(41, 185, 95, 0.2);
 }
 
 .footer-transition {
@@ -1106,6 +1175,24 @@ em {
 
   .skills-left {
     margin-bottom: 10vh;
+  }
+
+  .skills-kicker {
+    margin-bottom: 1.4rem;
+  }
+
+  .skills-left h2 {
+    font-size: clamp(42px, 14vw, 64px);
+  }
+
+  .skills-intro {
+    max-width: 100%;
+    margin-top: 1.35rem;
+  }
+
+  .skills-rule {
+    width: 100%;
+    margin-top: 2rem;
   }
 
   .skill-group button {
