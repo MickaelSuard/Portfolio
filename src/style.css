@@ -686,7 +686,7 @@ em {
 .circle-gallery {
   position: relative;
   z-index: 915;
-  height: 680vh;
+  height: 430vh;
   overflow: visible;
   color: var(--black);
   background: var(--white);
@@ -1020,7 +1020,7 @@ em {
   }
 
   .circle-gallery {
-    height: 560vh;
+    height: 360vh;
   }
 
   .gallery-phrase {
