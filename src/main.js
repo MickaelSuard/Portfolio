@@ -221,8 +221,29 @@ function initHeroScroll() {
   const nameColorTargets = gsap.utils.toArray(".intro-name, .intro-name__first, .intro-name__first-rest, .intro-name__last, .intro-char");
   const viewport = document.querySelector(".world-viewport");
   const media = document.querySelector(".world-media__asset");
+  const homeFrameCount = 121;
+  const homeFrameSrc = (index) => `/home-frames/intro-${String(index).padStart(3, "0")}.jpg`;
+  const homeFrames = Array.from({ length: homeFrameCount }, (_, index) => {
+    const image = new Image();
+    image.src = homeFrameSrc(index + 1);
+    return image;
+  });
+  const homeFrameStart = 0.34;
+  const homeFrameEnd = 0.94;
+  let activeHomeFrame = 0;
+  const scrubHomeFrames = (progress) => {
+    if (!(media instanceof HTMLImageElement)) return;
+    const frameProgress = Math.min(1, Math.max(0, (progress - homeFrameStart) / (homeFrameEnd - homeFrameStart)));
+    const nextFrame = Math.min(homeFrameCount - 1, Math.max(0, Math.round(frameProgress * (homeFrameCount - 1))));
+    if (nextFrame === activeHomeFrame) return;
+    activeHomeFrame = nextFrame;
+    media.src = homeFrames[nextFrame].src;
+  };
   const startWidth = mobile ? 24 : 34;
   const startHeight = () => Math.round(window.innerHeight * (mobile ? 0.22 : 0.24));
+  const introAspect = 1244 / 1666;
+  const worldCoverWidth = () => `${Math.max(window.innerWidth, window.innerHeight * introAspect)}px`;
+  const worldCoverHeight = () => `${Math.max(window.innerHeight, window.innerWidth / introAspect)}px`;
   gsap.set(viewport, {
     "--world-width": `${startWidth}px`,
     "--world-height": `${startHeight()}px`,
@@ -242,10 +263,12 @@ function initHeroScroll() {
       scrub: 0.55,
       invalidateOnRefresh: true,
       onUpdate: ({ progress }) => {
+        scrubHomeFrames(progress);
         if (!heroChromeReady) return;
         setHeroChromeVisible(progress < 0.88);
       },
       onRefresh: ({ progress }) => {
+        scrubHomeFrames(progress);
         if (!heroChromeReady) return;
         setHeroChromeVisible(progress < 0.88, true);
       },
@@ -260,12 +283,12 @@ function initHeroScroll() {
     .to(nameColorTargets, { color: "#d9a441", duration: 0.18, ease: "none" }, 0.3)
     .to(name, { "--intro-gap": () => `${window.innerWidth * (mobile ? 0.52 : 0.56)}px`, duration: 0.78, ease: "none" }, 0.18)
     .to(viewport, {
-      "--world-width": () => `${window.innerWidth}px`,
-      "--world-height": () => `${window.innerHeight}px`,
+      "--world-width": worldCoverWidth,
+      "--world-height": worldCoverHeight,
       duration: 0.78,
       ease: "none",
     }, 0.18)
-    .to(media, { scale: 1.12, duration: 0.78, ease: "none" }, 0.18)
+    .to(media, { scale: 1, duration: 0.78, ease: "none" }, 0.18)
     .to([firstGroup, lastGroup], { opacity: 0, duration: 0.18, ease: "none" }, 0.78)
     .to(".world-phrase", { opacity: 1, filter: "blur(0px)", duration: 0.18, ease: "none" }, 0.76);
 
