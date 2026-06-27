@@ -9,6 +9,39 @@ const mobile = window.matchMedia("(max-width: 768px)").matches;
 const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const previewMode = new URLSearchParams(window.location.search).has("preview");
 
+if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+if (!previewMode && window.location.hash) history.replaceState(null, "", window.location.pathname + window.location.search);
+
+let lenis = null;
+
+function resetScrollToTop() {
+  if (previewMode) return;
+  document.documentElement.scrollTop = 0;
+  document.body.scrollTop = 0;
+  window.scrollTo(0, 0);
+  lenis?.scrollTo(0, { immediate: true, force: true });
+}
+
+function keepInitialScrollAtTop() {
+  if (previewMode) return;
+  let frames = 14;
+  const reset = () => {
+    resetScrollToTop();
+    if (frames > 0) {
+      frames -= 1;
+      requestAnimationFrame(reset);
+      return;
+    }
+    ScrollTrigger.refresh();
+  };
+  reset();
+}
+
+resetScrollToTop();
+window.addEventListener("pageshow", keepInitialScrollAtTop);
+window.addEventListener("beforeunload", resetScrollToTop);
+window.addEventListener("load", keepInitialScrollAtTop);
+
 let heroChromeReady = false;
 let heroChromeVisible = false;
 
@@ -51,7 +84,8 @@ function initLenis() {
   return lenis;
 }
 
-const lenis = initLenis();
+lenis = initLenis();
+resetScrollToTop();
 
 function createGradientCanvas() {
   const canvas = document.querySelector(".hero-gradient");
