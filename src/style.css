@@ -373,13 +373,13 @@ em {
 
 .about-photo {
   position: absolute;
-  right: 0;
+  right: 2vw;
   top: 10vh;
   z-index: 7;
   width: min(55vw, 790px);
   height: 1280px;
   overflow: hidden;
-  border-radius: 300px 0 0 300px;
+  border-radius: 300px 0 300px 300px;
   background: var(--about-bg);
   opacity: 0;
   filter: blur(20px);
