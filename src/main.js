@@ -716,61 +716,41 @@ function initProjects() {
   const date = preview.querySelector(".project-preview__date");
   const projectDetails = [
     {
-      title: "Nébula Website",
+      title: "Portfolio 2026",
       description: "Direction créative, interface responsive et animations fluides pour une présence web immersive.",
       stack: "Creative development / Motion / Front-end",
-      image: "/udl.jpg",
+      image: "/folio.png",
       tint: "rgba(93, 84, 156, 0.26)",
     },
     {
-      title: "Anima",
+      title: "Rh-recrutement",
       description: "Prototype interactif centré sur les transitions, les micro-interactions et la sensation de navigation.",
       stack: "Interaction design / GSAP / UI",
       image: "/home-frames/intro-020.jpg",
       tint: "rgba(163, 115, 211, 0.28)",
     },
     {
-      title: "Osmose App",
+      title: "Gestion des serveurs",
       description: "Interface produit claire pour organiser des contenus, comparer des états et accélérer les décisions.",
       stack: "Product design / Dashboard / UX",
       image: "/home-frames/intro-043.jpg",
       tint: "rgba(0, 150, 214, 0.24)",
     },
-    {
-      title: "Zenith",
-      description: "Expérience éditoriale verticale avec rythme typographique, sections immersives et narration scrollée.",
-      stack: "Editorial / Scroll experience / Art direction",
-      image: "/home-frames/intro-064.jpg",
-      tint: "rgba(217, 164, 65, 0.24)",
-    },
-    {
-      title: "Monoform",
-      description: "Système visuel minimaliste autour de composants réutilisables et d’une grille très structurée.",
+     {
+      title: "Tony-VolleyBall",
+      description: "Système visuel minimaliste autour de composants réutilisables et d'une grille très structurée.",
       stack: "Design system / Components / Front-end",
-      image: "/home-frames/intro-087.jpg",
+      image: "/tony.png",
       tint: "rgba(126, 58, 99, 0.28)",
     },
     {
-      title: "ChromaBlock",
-      description: "Exploration colorée mêlant blocs dynamiques, transitions rapides et interactions au pointeur.",
-      stack: "Creative coding / Canvas / Motion",
-      image: "/home-frames/intro-110.jpg",
-      tint: "rgba(235, 153, 152, 0.28)",
+      title: "Carolina - Projet IA",
+      description: "Expérience éditoriale verticale avec rythme typographique, sections immersives et narration scrollée.",
+      stack: "Editorial / Scroll experience / Art direction",
+      image: "/carolina.png",
+      tint: "rgba(217, 164, 65, 0.24)",
     },
-    {
-      title: "Symphony",
-      description: "Composition web rythmée par le mouvement, pensée pour donner une lecture fluide d’un contenu dense.",
-      stack: "Motion system / Layout / Performance",
-      image: "/about-frames/me-018.jpg",
-      tint: "rgba(93, 84, 156, 0.22)",
-    },
-    {
-      title: "Echo",
-      description: "Landing interactive avec feedback visuel immédiat, détails soignés et navigation expressive.",
-      stack: "Landing page / Interaction / Front-end",
-      image: "/about-frames/me-074.jpg",
-      tint: "rgba(0, 150, 214, 0.2)",
-    },
+   
   ];
   projectDetails.forEach(({ image }) => {
     const preload = new Image();
@@ -790,7 +770,11 @@ function initProjects() {
 
   const activate = (index) => {
     if (index === current) return;
-    items.forEach((item, itemIndex) => item.classList.toggle("is-active", itemIndex === index));
+    items.forEach((item, itemIndex) => {
+      const isActive = itemIndex === index;
+      item.classList.toggle("is-active", isActive);
+      item.setAttribute("aria-pressed", String(isActive));
+    });
     date.textContent = items[index].dataset.date;
     updateDetail(index);
     cubePreview.show(projectDetails[index], index);
@@ -798,6 +782,32 @@ function initProjects() {
     detail.classList.add("is-visible");
     gsap.fromTo(detail, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.28 });
     current = index;
+  };
+
+  const clamp = (value, min = 0, max = 1) => Math.max(min, Math.min(max, value));
+  const getProjectScrollMetrics = () => {
+    const sectionTop = section.getBoundingClientRect().top + window.scrollY;
+    const scrollRange = Math.max(1, section.offsetHeight - window.innerHeight);
+    return { sectionTop, scrollRange };
+  };
+
+  const getIndexFromScroll = () => {
+    const { sectionTop, scrollRange } = getProjectScrollMetrics();
+    const progress = clamp((window.scrollY - sectionTop) / scrollRange);
+    return Math.round(progress * (items.length - 1));
+  };
+
+  const scrollToProject = (index) => {
+    const { sectionTop, scrollRange } = getProjectScrollMetrics();
+    const progress = items.length > 1 ? index / (items.length - 1) : 0;
+    const targetY = sectionTop + scrollRange * progress;
+
+    if (lenis) {
+      lenis.scrollTo(targetY, { duration: 0.9 });
+      return;
+    }
+
+    window.scrollTo({ top: targetY, behavior: reduced ? "auto" : "smooth" });
   };
 
   ScrollTrigger.create({
@@ -815,33 +825,24 @@ function initProjects() {
   const updateActive = () => {
     if (!visible) return;
     const center = window.innerHeight / 2;
-    let closest = 0;
-    let distance = Infinity;
     items.forEach((item, index) => {
       const rect = item.getBoundingClientRect();
       const itemDistance = Math.abs(rect.top + rect.height / 2 - center);
       xSetters[index](Math.min(itemDistance / center, 1) * 78);
-      if (itemDistance < distance) {
-        distance = itemDistance;
-        closest = index;
-      }
     });
-    activate(closest);
+    activate(getIndexFromScroll());
   };
 
   items.forEach((item, index) => {
-    item.addEventListener("mouseenter", () => activate(index));
-    item.addEventListener("focus", () => activate(index));
+    item.setAttribute("aria-pressed", String(index === 0));
     item.addEventListener("click", () => {
-      updateDetail(index);
-      activate(index);
-      detail.classList.add("is-visible");
-      gsap.to(detail, { opacity: 1, y: 0, duration: 0.3, overwrite: true });
+      scrollToProject(index);
     });
   });
 
   window.addEventListener("scroll", updateActive, { passive: true });
   lenis?.on("scroll", updateActive);
+  activate(0);
   updateActive();
 }
 
