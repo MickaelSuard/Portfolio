@@ -376,8 +376,8 @@ body.is-name-hover-ready .intro-char {
 
 .about {
   position: relative;
-  min-height: 188vh;
-  padding: 10vh 4rem 34vh;
+  min-height: 150vh;
+  padding: 10vh 4rem 16vh;
   overflow: hidden;
   color: var(--black);
   background: var(--about-bg);
@@ -487,7 +487,7 @@ body.is-name-hover-ready .intro-char {
 .projects {
   position: relative;
   min-height: 140vh;
-  padding: 20vh 0;
+  padding: 12vh 0 20vh;
   z-index: auto;
   color: var(--black);
   background: transparent;
@@ -1141,7 +1141,7 @@ body.is-name-hover-ready .intro-char {
 
   .about {
     min-height: auto;
-    padding: 18vh 1.5rem 22vh;
+    padding: 18vh 1.5rem 12vh;
   }
 
   .about-lead,
@@ -1170,7 +1170,7 @@ body.is-name-hover-ready .intro-char {
 
   .projects {
     min-height: auto;
-    padding: 18vh 1.5rem;
+    padding: 10vh 1.5rem 18vh;
   }
 
   .projects-list {

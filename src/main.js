@@ -812,7 +812,7 @@ function initProjects() {
 
   ScrollTrigger.create({
     trigger: section,
-    start: "top 80%",
+    start: "top 30%",
     end: "bottom 20%",
     onToggle: ({ isActive }) => {
       visible = isActive;
