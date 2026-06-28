@@ -415,7 +415,7 @@ function initHeroScroll() {
     },
   })
     .to(".world-phrase", { opacity: 0, duration: 0.25 }, 0)
-    .to(viewport, { y: "-50vh", filter: "blur(15px)", opacity: 0.3, duration: 1, ease: "none" }, 0);
+    .to(viewport, { y: "-50vh", filter: "blur(15px)", opacity: 0, duration: 1, ease: "none" }, 0);
 }
 
 function initAbout() {
@@ -717,40 +717,40 @@ function initProjects() {
   const projectDetails = [
     {
       title: "Portfolio 2026",
-      description: "Direction créative, interface responsive et animations fluides pour une présence web immersive.",
-      stack: "Creative development / Motion / Front-end",
+      description: "Création de mon portfolio 2026.",
+      stack: "HTML / CSS / JavaScript / GSAP / Lenis / Matter.js",
       image: "/folio.png",
       tint: "rgba(93, 84, 156, 0.26)",
     },
     {
       title: "Rh-recrutement",
-      description: "Prototype interactif centré sur les transitions, les micro-interactions et la sensation de navigation.",
-      stack: "Interaction design / GSAP / UI",
-      image: "/home-frames/intro-020.jpg",
+      description: "Conception d'un application en interne à l'université de Lyon de suivi demande de recrutement jusq'au suivi de candidature.",
+      stack: "Symfony / API / React",
+      image: "/recrutement.png",
       tint: "rgba(163, 115, 211, 0.28)",
     },
     {
       title: "Gestion des serveurs",
-      description: "Interface produit claire pour organiser des contenus, comparer des états et accélérer les décisions.",
-      stack: "Product design / Dashboard / UX",
-      image: "/home-frames/intro-043.jpg",
+      description: "Gestion et maintenance des serveurs en interne.",
+      stack: "Linux / Unix / Bash / Shell",
+      image: "/server.png",
       tint: "rgba(0, 150, 214, 0.24)",
     },
-     {
+    {
       title: "Tony-VolleyBall",
-      description: "Système visuel minimaliste autour de composants réutilisables et d'une grille très structurée.",
-      stack: "Design system / Components / Front-end",
+      description: "Création d'un jeu vidéo en Unity comme Blobby Volley.",
+      stack: "Unity",
       image: "/tony.png",
       tint: "rgba(126, 58, 99, 0.28)",
     },
     {
       title: "Carolina - Projet IA",
-      description: "Expérience éditoriale verticale avec rythme typographique, sections immersives et narration scrollée.",
-      stack: "Editorial / Scroll experience / Art direction",
+      description: "Création d'une application d'IA locale dédiée à la génération de texte, au résumé d'audios et de documents, ainsi qu'à l'intégration de fonctionnalités RAG pour la recherche d'informations.",
+      stack: "LLM / Vector Store / Embedding / RAG / LangChain / Python",
       image: "/carolina.png",
       tint: "rgba(217, 164, 65, 0.24)",
     },
-   
+
   ];
   projectDetails.forEach(({ image }) => {
     const preload = new Image();
@@ -763,9 +763,17 @@ function initProjects() {
   const updateDetail = (index) => {
     const data = projectDetails[index];
     if (!data) return;
+    const stack = detail.querySelector(".project-detail__stack");
     detail.querySelector("h3").textContent = data.title;
     detail.querySelector("p").textContent = data.description;
-    detail.querySelector("span").textContent = data.stack;
+    if (stack) {
+      const tags = data.stack.split("/").map((tag) => tag.trim()).filter(Boolean);
+      stack.replaceChildren(...tags.map((tag) => {
+        const chip = document.createElement("span");
+        chip.textContent = tag;
+        return chip;
+      }));
+    }
   };
 
   const activate = (index) => {
@@ -813,7 +821,7 @@ function initProjects() {
   ScrollTrigger.create({
     trigger: section,
     start: "top 30%",
-    end: "bottom 20%",
+    end: "bottom 65%",
     onToggle: ({ isActive }) => {
       visible = isActive;
       cubePreview.setActive(isActive);
