@@ -1,5 +1,11 @@
 @import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap");
 
+@font-face {
+  font-family: "GTA Art Deco";
+  src: url("../assets/fonts/GTAArtDeco.woff") format("woff");
+  font-display: swap;
+}
+
 :root {
   --black: #0a0a0a;
   --white: #f6f6f6;
@@ -35,6 +41,28 @@ body {
   font-family: "DM Sans", sans-serif;
   -webkit-font-smoothing: antialiased;
   overflow-x: clip;
+  transition:
+    background-color 1.2s ease,
+    color 1.2s ease;
+}
+
+body.is-vice-city {
+  --black: #101022;
+  --white: #ff73a6;
+  --about-bg: #101022;
+  --red: linear-gradient(90deg, #ff6f91 0%, #ff9671 48%, #ffd36a 100%);
+  --red-solid: #ff73a6;
+  --vice-bg: #101022;
+  --vice-pink: #ff73a6;
+  --vice-pink-hot: #ff8bb8;
+  --vice-orange: #ff9671;
+  --vice-yellow: #ffd36a;
+  --vice-text-gradient: linear-gradient(90deg, #ff6f91 0%, #ff9671 48%, #ffd36a 100%);
+  --vice-muted: rgba(255, 115, 166, 0.44);
+  background:
+    radial-gradient(circle at 16% 14%, rgba(255, 115, 166, 0.2), transparent 34vw),
+    radial-gradient(circle at 84% 20%, rgba(255, 211, 106, 0.14), transparent 30vw),
+    var(--vice-bg);
 }
 
 a {
@@ -465,6 +493,41 @@ body.is-name-hover-ready .intro-char {
   line-height: 1.55;
   opacity: 0;
   filter: blur(12px);
+}
+
+.about-letter {
+  display: inline-block;
+  min-width: 0.18em;
+  transform-origin: 50% 72%;
+  transition:
+    font-family 0.2s ease,
+    transform 0.2s ease;
+}
+
+.about-letter.is-art-deco {
+  color: #ff73a6;
+  font-family: "GTA Art Deco", "DM Sans", sans-serif;
+  transform: translateY(-0.04em) scale(1.08);
+}
+
+.about-small.is-complete .about-letter.is-art-deco {
+  color: inherit;
+}
+
+.about-small.is-complete p {
+  color: #ff73a6;
+  background: linear-gradient(90deg, #ff6f91 0%, #ff9671 48%, #ffd36a 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.about-small.is-complete p * {
+  color: inherit;
+  background: none;
+  -webkit-background-clip: initial;
+  background-clip: initial;
+  -webkit-text-fill-color: inherit;
 }
 
 .about-small a {
@@ -1365,6 +1428,179 @@ body.is-name-hover-ready .intro-char {
   .ascii--right {
     right: -48%;
   }
+}
+
+body.is-vice-city .dark-content,
+body.is-vice-city .about,
+body.is-vice-city .projects,
+body.is-vice-city .circle-gallery,
+body.is-vice-city .skills,
+body.is-vice-city .footer-transition {
+  color: var(--vice-pink);
+  background:
+    radial-gradient(circle at 16% 18%, rgba(255, 115, 166, 0.13), transparent 32vw),
+    radial-gradient(circle at 86% 14%, rgba(255, 211, 106, 0.1), transparent 30vw),
+    linear-gradient(180deg, #101022 0%, #15132b 48%, #101022 100%);
+  transition:
+    background 1.2s ease,
+    color 1.2s ease;
+}
+
+body.is-vice-city .hero {
+  background:
+    radial-gradient(circle at 24% 28%, rgba(255, 115, 166, 0.22), transparent 30vw),
+    radial-gradient(circle at 76% 22%, rgba(255, 211, 106, 0.13), transparent 28vw),
+    var(--vice-bg);
+}
+
+body.is-vice-city .hero-line,
+body.is-vice-city .scroll-timeline__bar {
+  background:
+    linear-gradient(var(--vice-pink), var(--vice-yellow)) 0 0 / 100% var(--progress, 100%) no-repeat,
+    rgba(255, 115, 166, 0.16);
+}
+
+body.is-vice-city,
+body.is-vice-city *,
+body.is-vice-city a,
+body.is-vice-city button,
+body.is-vice-city p,
+body.is-vice-city span,
+body.is-vice-city h1,
+body.is-vice-city h2,
+body.is-vice-city h3,
+body.is-vice-city em,
+body.is-vice-city .project-item,
+body.is-vice-city .skill-pill,
+body.is-vice-city .project-detail,
+body.is-vice-city .footer-name {
+  font-family: "GTA Art Deco", "DM Sans", sans-serif;
+  text-shadow: none !important;
+}
+
+body.is-vice-city a,
+body.is-vice-city button,
+body.is-vice-city p,
+body.is-vice-city span,
+body.is-vice-city em,
+body.is-vice-city .project-item,
+body.is-vice-city .skill-pill,
+body.is-vice-city .project-detail,
+body.is-vice-city .footer-name,
+body.is-vice-city .scroll-timeline__label,
+body.is-vice-city .scroll-pct {
+  color: #fff;
+  background: none;
+  -webkit-text-fill-color: currentColor;
+  text-shadow: none;
+}
+
+body.is-vice-city h1,
+body.is-vice-city h2,
+body.is-vice-city h3,
+body.is-vice-city .about-lead,
+body.is-vice-city .skills-left h2,
+body.is-vice-city .project-detail h3 {
+  color: var(--vice-pink);
+  background: var(--vice-text-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: none;
+}
+
+body.is-vice-city .about-small p,
+body.is-vice-city .gallery-phrase {
+  color: var(--vice-pink);
+  background: var(--vice-text-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+body.is-vice-city .about-small p *,
+body.is-vice-city .gallery-phrase * {
+  color: inherit;
+  background: none;
+  -webkit-background-clip: initial;
+  background-clip: initial;
+  -webkit-text-fill-color: inherit;
+}
+
+body.is-vice-city a,
+body.is-vice-city button,
+body.is-vice-city .about-small,
+body.is-vice-city .skills-intro,
+body.is-vice-city .scroll-timeline__label,
+body.is-vice-city .scroll-pct {
+  color: #fff;
+}
+
+body.is-vice-city a:hover,
+body.is-vice-city button:hover,
+body.is-vice-city .footer-top a:hover,
+body.is-vice-city .hero-bar a:hover,
+body.is-vice-city .skill-group button:hover span {
+  color: var(--vice-yellow);
+  background: linear-gradient(90deg, #ffd36a 0%, #ff9671 52%, #ff8bb8 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: none;
+}
+
+body.is-vice-city .fluid-line path {
+  stroke: url("#vice-line-gradient");
+  filter: none;
+}
+
+body.is-vice-city .project-item {
+  border-color: rgba(255, 115, 166, 0.22);
+  color: rgba(255, 255, 255, 0.46);
+}
+
+body.is-vice-city .project-item:hover,
+body.is-vice-city .project-item.is-active {
+  color: #fff;
+  text-shadow: none;
+}
+
+body.is-vice-city .project-detail,
+body.is-vice-city .skill-pill {
+  color: #fff;
+  border-color: rgba(255, 115, 166, 0.28);
+  background:
+    linear-gradient(145deg, rgba(255, 115, 166, 0.08), rgba(255, 211, 106, 0.05)),
+    rgba(16, 16, 34, 0.72);
+  box-shadow:
+    0 24px 70px rgba(255, 115, 166, 0.1),
+    0 0 34px rgba(255, 211, 106, 0.06);
+}
+
+body.is-vice-city .skill-group.is-open {
+  border-top: 1px solid rgba(255, 115, 166, 0.28);
+  border-bottom: 1px solid rgba(255, 115, 166, 0.28);
+  background: none;
+  box-shadow: none;
+}
+
+body.is-vice-city .footer {
+  background:
+    radial-gradient(circle at 18% 28%, rgba(255, 115, 166, 0.2), transparent 30vw),
+    radial-gradient(circle at 78% 24%, rgba(255, 211, 106, 0.11), transparent 30vw),
+    linear-gradient(135deg, #101022 0%, #17132e 50%, #101022 100%);
+}
+
+body.is-vice-city .footer-name,
+body.is-vice-city .footer-name span {
+  color: #fff;
+  background: none;
+  -webkit-text-fill-color: #fff;
+  text-shadow: none;
+}
+
+body.is-vice-city .ascii-canvas {
+  filter: hue-rotate(308deg) saturate(1.25) brightness(1.08);
 }
 
 @media (prefers-reduced-motion: reduce) {

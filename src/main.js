@@ -424,7 +424,84 @@ function initHeroScroll() {
     .to(viewport, { y: "-50vh", filter: "blur(15px)", opacity: 0, duration: 1, ease: "none" }, 0);
 }
 
+function initAboutLetterTheme() {
+  const container = document.querySelector(".about-small");
+  const paragraph = container?.querySelector("p");
+  if (!container || !paragraph || paragraph.dataset.letterThemeReady) return;
+
+  paragraph.dataset.letterThemeReady = "true";
+  document.fonts?.load('1em "GTA Art Deco"');
+
+  const hoveredLetters = new Set();
+  const letters = [];
+  const walker = document.createTreeWalker(paragraph, NodeFilter.SHOW_TEXT);
+  const textNodes = [];
+
+  while (walker.nextNode()) textNodes.push(walker.currentNode);
+
+  textNodes.forEach((node) => {
+    const fragment = document.createDocumentFragment();
+    Array.from(node.textContent).forEach((char) => {
+      if (/\s/.test(char)) {
+        fragment.append(document.createTextNode(char));
+        return;
+      }
+
+      const span = document.createElement("span");
+      span.className = "about-letter";
+      span.textContent = char;
+      span.dataset.index = String(letters.length);
+      fragment.append(span);
+      letters.push(span);
+    });
+    node.replaceWith(fragment);
+  });
+
+  const activateViceCity = () => {
+    if (document.body.classList.contains("is-vice-city")) return;
+    container.classList.add("is-complete");
+
+    const applyTheme = () => {
+      document.body.classList.add("is-vice-city");
+      if (lenis) {
+        lenis.scrollTo(0, { duration: 1.4, force: true });
+      } else {
+        window.scrollTo({ top: 0, behavior: hasReducedMotion() ? "auto" : "smooth" });
+      }
+      ScrollTrigger.refresh();
+    };
+
+    applyTheme();
+
+    if (!hasReducedMotion()) {
+      gsap.fromTo(
+        ".about-letter.is-art-deco",
+        { y: -3 },
+        { y: 0, duration: 0.45, ease: "elastic.out(1, 0.55)", stagger: { each: 0.006, from: "random" } },
+      );
+    }
+
+    ScrollTrigger.refresh();
+  };
+
+  const markLetter = (letter) => {
+    const index = letter.dataset.index;
+    if (hoveredLetters.has(index)) return;
+
+    hoveredLetters.add(index);
+    letter.classList.add("is-art-deco");
+
+    if (hoveredLetters.size === letters.length) activateViceCity();
+  };
+
+  letters.forEach((letter) => {
+    letter.addEventListener("pointerenter", () => markLetter(letter));
+    letter.addEventListener("focus", () => markLetter(letter));
+  });
+}
+
 function initAbout() {
+  initAboutLetterTheme();
   document.querySelectorAll(".split-words").forEach(splitElementWords);
   document.querySelectorAll(".about-lead .word").forEach((word) => {
     gsap.to(word, {
@@ -1218,6 +1295,32 @@ function setupFooterAscii(footer) {
     });
   };
 
+  const drawBaseHand = (control) => {
+    control.baseCanvas.width = control.canvas.width;
+    control.baseCanvas.height = control.canvas.height;
+    control.baseContext.setTransform(DPR, 0, 0, DPR, 0, 0);
+    control.baseContext.clearRect(0, 0, control.width, control.height);
+    control.baseContext.font = `${FONT_SIZE}px monospace`;
+    control.baseContext.textAlign = "center";
+    control.baseContext.textBaseline = "alphabetic";
+    control.baseContext.fillStyle = CHAR_COLOR;
+    control.baseContext.shadowColor = CHAR_SHADOW_COLOR;
+    control.baseContext.shadowBlur = 4;
+
+    for (const cell of control.cellList) {
+      control.baseContext.globalAlpha = cell.alpha;
+      control.baseContext.fillText(
+        cell.char,
+        cell.col * CELL_SIZE + CELL_SIZE / 2,
+        cell.row * CELL_SIZE + control.baselineOffset,
+      );
+    }
+
+    control.baseContext.globalAlpha = 1;
+    control.baseContext.shadowColor = "transparent";
+    control.baseContext.shadowBlur = 0;
+  };
+
   const rebuildHand = (control) => {
     if (!control.source) return;
 
@@ -1292,6 +1395,8 @@ function setupFooterAscii(footer) {
     control.height = height;
     control.cells = cells;
     control.cellList = cellList;
+    control.activeCells.clear();
+    drawBaseHand(control);
     drawHand(control);
   };
 
@@ -1300,45 +1405,40 @@ function setupFooterAscii(footer) {
 
     const now = performance.now();
     const context = control.context;
-    context.clearRect(0, 0, control.width, control.height);
+    context.save();
+    context.setTransform(1, 0, 0, 1, 0, 0);
+    context.clearRect(0, 0, control.canvas.width, control.canvas.height);
+    context.drawImage(control.baseCanvas, 0, 0);
+    context.restore();
     context.font = `${FONT_SIZE}px monospace`;
     context.textAlign = "center";
     context.textBaseline = "alphabetic";
+    context.shadowColor = "transparent";
+    context.shadowBlur = 0;
 
     let hasActiveHighlights = false;
 
-    for (const cell of control.cellList) {
+    for (const cell of control.activeCells) {
       const x = cell.col * CELL_SIZE;
       const y = cell.row * CELL_SIZE;
       const isHighlighted = cell.highlightEndTime > now;
 
-      if (isHighlighted) {
-        hasActiveHighlights = true;
-        context.globalAlpha = 1;
-        context.fillStyle = HOVER_COLOR;
-        context.fillRect(x, y, CELL_SIZE, CELL_SIZE);
+      if (!isHighlighted) {
+        control.activeCells.delete(cell);
+        continue;
       }
 
+      hasActiveHighlights = true;
       context.globalAlpha = 1;
-      context.fillStyle = isHighlighted ? HOVER_CHAR_COLOR : CHAR_COLOR;
-      if (!isHighlighted) {
-        context.globalAlpha = cell.alpha;
-        context.shadowColor = CHAR_SHADOW_COLOR;
-        context.shadowBlur = 7;
-      } else {
-        context.shadowColor = "transparent";
-        context.shadowBlur = 0;
-      }
+      context.fillStyle = HOVER_COLOR;
+      context.fillRect(x, y, CELL_SIZE, CELL_SIZE);
+      context.fillStyle = HOVER_CHAR_COLOR;
       context.fillText(
-        isHighlighted ? cell.highlightChar : cell.char,
+        cell.highlightChar,
         x + CELL_SIZE / 2,
         y + control.baselineOffset,
       );
-      context.globalAlpha = 1;
-      context.shadowColor = "transparent";
-      context.shadowBlur = 0;
 
-      if (!isHighlighted) continue;
       if (cell.highlightEndTime <= now + 16) {
         context.globalAlpha = 0.5;
         context.fillStyle = CHAR_COLOR;
@@ -1354,6 +1454,7 @@ function setupFooterAscii(footer) {
     const now = performance.now();
     startCell.highlightEndTime = now + HIGHLIGHT_LIFETIME;
     startCell.highlightChar = HOVER_CHARS[Math.floor(Math.random() * HOVER_CHARS.length)];
+    control.activeCells.add(startCell);
 
     const steps = Math.floor(Math.random() * CLUSTER_SIZE) + 1;
     const litCells = [startCell];
@@ -1374,30 +1475,41 @@ function setupFooterAscii(footer) {
       const next = neighbours[Math.floor(Math.random() * neighbours.length)];
       next.highlightEndTime = now + HIGHLIGHT_LIFETIME + step * 10;
       next.highlightChar = HOVER_CHARS[Math.floor(Math.random() * HOVER_CHARS.length)];
+      control.activeCells.add(next);
       litCells.push(next);
       current = next;
     }
   };
 
-  const hoverHand = (control, event) => {
+  const hoverHand = (control, pointer) => {
     if (!control.cellList.length) return false;
     const rect = control.canvas.getBoundingClientRect();
-    const mouseCol = ((event.clientX - rect.left) / rect.width) * control.columns;
-    const mouseRow = ((event.clientY - rect.top) / rect.height) * control.rows;
+    const mouseCol = ((pointer.x - rect.left) / rect.width) * control.columns;
+    const mouseRow = ((pointer.y - rect.top) / rect.height) * control.rows;
+    const centerCol = Math.round(mouseCol);
+    const centerRow = Math.round(mouseRow);
+    const radius = Math.ceil(HOVER_RADIUS);
+    const radiusSq = HOVER_RADIUS * HOVER_RADIUS;
 
     let closest = null;
     let closestDist = Infinity;
-    for (const cell of control.cellList) {
-      const dx = mouseCol - cell.col;
-      const dy = mouseRow - cell.row;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      if (dist < closestDist) {
-        closestDist = dist;
-        closest = cell;
+
+    for (let row = centerRow - radius; row <= centerRow + radius; row += 1) {
+      for (let col = centerCol - radius; col <= centerCol + radius; col += 1) {
+        const cell = control.cells.get(`${col},${row}`);
+        if (!cell) continue;
+
+        const dx = mouseCol - cell.col;
+        const dy = mouseRow - cell.row;
+        const distSq = dx * dx + dy * dy;
+        if (distSq < closestDist) {
+          closestDist = distSq;
+          closest = cell;
+        }
       }
     }
 
-    if (closest && closestDist <= HOVER_RADIUS) {
+    if (closest && closestDist <= radiusSq) {
       highlightCluster(control, closest);
       return true;
     }
@@ -1434,10 +1546,14 @@ function setupFooterAscii(footer) {
       scale: 1.06,
       cells: new Map(),
       cellList: [],
+      activeCells: new Set(),
+      baseCanvas: document.createElement("canvas"),
+      baseContext: null,
       x: gsap.quickTo(canvas, "x", { duration: 0.65, ease: "power3.out" }),
       y: gsap.quickTo(canvas, "y", { duration: 0.65, ease: "power3.out" }),
       rotate: gsap.quickTo(canvas, "rotate", { duration: 0.65, ease: "power3.out" }),
     };
+    control.baseContext = control.baseCanvas.getContext("2d");
 
     image.addEventListener("load", () => {
       try {
@@ -1459,6 +1575,7 @@ function setupFooterAscii(footer) {
       controls.forEach((control) => {
         control.cells.clear();
         control.cellList = [];
+        control.activeCells.clear();
         rebuildHand(control);
       });
       requestRender();
@@ -1467,20 +1584,39 @@ function setupFooterAscii(footer) {
 
   if (hasReducedMotion()) return;
 
-  footer.addEventListener("pointermove", (event) => {
-    const pointerX = event.clientX / globalThis.innerWidth - 0.5;
-    const pointerY = event.clientY / globalThis.innerHeight - 0.5;
-    let active = false;
-    controls.forEach((control) => {
-      control.x(pointerX * 34 * control.drift);
-      control.y(pointerY * 28);
-      control.rotate(pointerX * 5 * control.drift + pointerY * 2);
-      if (hoverHand(control, event)) active = true;
+  let pointerFrame = null;
+  let latestPointer = null;
+  const schedulePointerUpdate = (event) => {
+    latestPointer = { x: event.clientX, y: event.clientY };
+    if (pointerFrame) return;
+
+    pointerFrame = requestAnimationFrame(() => {
+      pointerFrame = null;
+      if (!latestPointer) return;
+
+      const pointerX = latestPointer.x / globalThis.innerWidth - 0.5;
+      const pointerY = latestPointer.y / globalThis.innerHeight - 0.5;
+      let active = false;
+      controls.forEach((control) => {
+        control.x(pointerX * 34 * control.drift);
+        control.y(pointerY * 28);
+        control.rotate(pointerX * 5 * control.drift + pointerY * 2);
+        if (hoverHand(control, latestPointer)) active = true;
+      });
+      if (active) requestRender();
     });
-    if (active) requestRender();
-  });
+  };
+
+  footer.addEventListener("pointermove", (event) => {
+    schedulePointerUpdate(event);
+  }, { passive: true });
 
   footer.addEventListener("pointerleave", () => {
+    if (pointerFrame) {
+      cancelAnimationFrame(pointerFrame);
+      pointerFrame = null;
+    }
+    latestPointer = null;
     controls.forEach((control) => {
       control.x(0);
       control.y(0);
