@@ -1134,9 +1134,366 @@ function initSkills() {
   });
 }
 
+function setupFooterAscii(footer) {
+  const left = footer.querySelector(".ascii--left");
+  const right = footer.querySelector(".ascii--right");
+  if (!left || !right) return;
+
+  const ASCII_CHARS = " .,:;irsXA253hMHGS#9B&@";
+  const FONT_SIZE = 17;
+  const CELL_SIZE = 20;
+  const ASCII_COLUMNS = mobile ? 76 : 96;
+  const DPR = 2;
+  const CHAR_COLOR = "#8b3d06";
+  const CHAR_SHADOW_COLOR = "rgba(255, 106, 0, 0.16)";
+  const HOVER_COLOR = "#ff6a00";
+  const HOVER_CHAR_COLOR = "#0f0f0f";
+  const HOVER_RADIUS = mobile ? 5 : 8;
+  const CLUSTER_SIZE = mobile ? 7 : 10;
+  const HIGHLIGHT_LIFETIME = 300;
+
+  const HOVER_CHARS = ["x", "X", "0", "3", "6", "9", "#", "@"];
+  const clamp = (value, min = 0, max = 1) => Math.max(min, Math.min(max, value));
+  const luminance = (red, green, blue) => red * 0.2126 + green * 0.7152 + blue * 0.0722;
+  const backgroundCharIndex = ASCII_CHARS.indexOf(".");
+
+  const prepareImage = (image) => {
+    const width = image.naturalWidth || image.width;
+    const height = image.naturalHeight || image.height;
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+
+    const context = canvas.getContext("2d", { willReadFrequently: true });
+    context.drawImage(image, 0, 0);
+    const data = context.getImageData(0, 0, width, height).data;
+    let minX = width;
+    let minY = height;
+    let maxX = 0;
+    let maxY = 0;
+
+    for (let y = 0; y < height; y += 1) {
+      for (let x = 0; x < width; x += 1) {
+        const offset = (y * width + x) * 4;
+        const alpha = data[offset + 3];
+        const light = luminance(data[offset], data[offset + 1], data[offset + 2]);
+        if (alpha < 16 || light < 14) continue;
+        minX = Math.min(minX, x);
+        minY = Math.min(minY, y);
+        maxX = Math.max(maxX, x);
+        maxY = Math.max(maxY, y);
+      }
+    }
+
+    if (minX > maxX || minY > maxY) {
+      return { canvas, bounds: { x: 0, y: 0, width, height } };
+    }
+
+    const padding = Math.round(Math.min(width, height) * 0.025);
+    const x = Math.max(0, minX - padding);
+    const y = Math.max(0, minY - padding);
+    return {
+      canvas,
+      bounds: {
+        x,
+        y,
+        width: Math.min(width - x, maxX - minX + 1 + padding * 2),
+        height: Math.min(height - y, maxY - minY + 1 + padding * 2),
+      },
+    };
+  };
+
+  let frame = null;
+  let controls = [];
+
+  const requestRender = () => {
+    if (frame) return;
+    frame = requestAnimationFrame(() => {
+      frame = null;
+      let hasActiveHighlights = false;
+      controls.forEach((control) => {
+        if (drawHand(control)) hasActiveHighlights = true;
+      });
+      if (hasActiveHighlights) requestRender();
+    });
+  };
+
+  const rebuildHand = (control) => {
+    if (!control.source) return;
+
+    const columns = ASCII_COLUMNS;
+    const rows = Math.max(1, Math.round(columns / (control.source.bounds.width / control.source.bounds.height)));
+    const width = columns * CELL_SIZE;
+    const height = rows * CELL_SIZE;
+
+    control.canvas.width = width * DPR;
+    control.canvas.height = height * DPR;
+    control.canvas.style.width = "100%";
+    control.canvas.style.height = "100%";
+    control.context.setTransform(DPR, 0, 0, DPR, 0, 0);
+    control.context.font = `${FONT_SIZE}px monospace`;
+    control.context.textAlign = "center";
+    control.context.textBaseline = "alphabetic";
+    control.element.style.aspectRatio = `${columns} / ${rows}`;
+    gsap.set(control.canvas, { scale: control.scale });
+
+    const metrics = control.context.measureText("X");
+    const glyphHeight = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
+    control.baselineOffset = metrics.actualBoundingBoxAscent
+      ? CELL_SIZE / 2 + glyphHeight / 2 - metrics.actualBoundingBoxDescent
+      : CELL_SIZE * 0.72;
+
+    const sampler = document.createElement("canvas");
+    sampler.width = columns;
+    sampler.height = rows;
+    const samplerContext = sampler.getContext("2d", { willReadFrequently: true });
+    samplerContext.imageSmoothingEnabled = true;
+    samplerContext.filter = "contrast(1.18) saturate(1.05)";
+    const bounds = control.source.bounds;
+    samplerContext.drawImage(control.source.canvas, bounds.x, bounds.y, bounds.width, bounds.height, 0, 0, columns, rows);
+    const data = samplerContext.getImageData(0, 0, columns, rows).data;
+    const cells = new Map();
+    const cellList = [];
+
+    for (let row = 0; row < rows; row += 1) {
+      for (let col = 0; col < columns; col += 1) {
+        const offset = (row * columns + col) * 4;
+        const alpha = data[offset + 3];
+        const red = data[offset];
+        const green = data[offset + 1];
+        const blue = data[offset + 2];
+        const light = luminance(red, green, blue);
+        const brightness = light / 255;
+        const edgeAlpha = alpha / 255;
+        const density = clamp((1 - brightness) * 0.66 + edgeAlpha * 0.5 - 0.08);
+        const charIndex = Math.min(
+          ASCII_CHARS.length - 1,
+          Math.floor(density * ASCII_CHARS.length),
+        );
+
+        if (alpha < 30 || light < 20 || charIndex <= backgroundCharIndex) continue;
+
+        const cell = {
+          col,
+          row,
+          char: ASCII_CHARS[charIndex],
+          alpha: clamp(edgeAlpha * 0.66 + density * 0.28, 0.12, 0.86),
+          highlightEndTime: 0,
+          highlightChar: ASCII_CHARS[charIndex],
+        };
+        cells.set(`${col},${row}`, cell);
+        cellList.push(cell);
+      }
+    }
+
+    control.columns = columns;
+    control.rows = rows;
+    control.width = width;
+    control.height = height;
+    control.cells = cells;
+    control.cellList = cellList;
+    drawHand(control);
+  };
+
+  function drawHand(control) {
+    if (!control.cellList.length) return false;
+
+    const now = performance.now();
+    const context = control.context;
+    context.clearRect(0, 0, control.width, control.height);
+    context.font = `${FONT_SIZE}px monospace`;
+    context.textAlign = "center";
+    context.textBaseline = "alphabetic";
+
+    let hasActiveHighlights = false;
+
+    for (const cell of control.cellList) {
+      const x = cell.col * CELL_SIZE;
+      const y = cell.row * CELL_SIZE;
+      const isHighlighted = cell.highlightEndTime > now;
+
+      if (isHighlighted) {
+        hasActiveHighlights = true;
+        context.globalAlpha = 1;
+        context.fillStyle = HOVER_COLOR;
+        context.fillRect(x, y, CELL_SIZE, CELL_SIZE);
+      }
+
+      context.globalAlpha = 1;
+      context.fillStyle = isHighlighted ? HOVER_CHAR_COLOR : CHAR_COLOR;
+      if (!isHighlighted) {
+        context.globalAlpha = cell.alpha;
+        context.shadowColor = CHAR_SHADOW_COLOR;
+        context.shadowBlur = 7;
+      } else {
+        context.shadowColor = "transparent";
+        context.shadowBlur = 0;
+      }
+      context.fillText(
+        isHighlighted ? cell.highlightChar : cell.char,
+        x + CELL_SIZE / 2,
+        y + control.baselineOffset,
+      );
+      context.globalAlpha = 1;
+      context.shadowColor = "transparent";
+      context.shadowBlur = 0;
+
+      if (!isHighlighted) continue;
+      if (cell.highlightEndTime <= now + 16) {
+        context.globalAlpha = 0.5;
+        context.fillStyle = CHAR_COLOR;
+        context.fillText(cell.char, x + CELL_SIZE / 2, y + control.baselineOffset);
+      }
+    }
+
+    context.globalAlpha = 1;
+    return hasActiveHighlights;
+  }
+
+  const highlightCluster = (control, startCell) => {
+    const now = performance.now();
+    startCell.highlightEndTime = now + HIGHLIGHT_LIFETIME;
+    startCell.highlightChar = HOVER_CHARS[Math.floor(Math.random() * HOVER_CHARS.length)];
+
+    const steps = Math.floor(Math.random() * CLUSTER_SIZE) + 1;
+    const litCells = [startCell];
+    let current = startCell;
+
+    for (let step = 0; step < steps; step += 1) {
+      const neighbours = [];
+      for (let dy = -1; dy <= 1; dy += 1) {
+        for (let dx = -1; dx <= 1; dx += 1) {
+          if (dx === 0 && dy === 0) continue;
+          const neighbour = control.cells.get(`${current.col + dx},${current.row + dy}`);
+          if (neighbour && !litCells.includes(neighbour)) neighbours.push(neighbour);
+        }
+      }
+
+      if (!neighbours.length) break;
+
+      const next = neighbours[Math.floor(Math.random() * neighbours.length)];
+      next.highlightEndTime = now + HIGHLIGHT_LIFETIME + step * 10;
+      next.highlightChar = HOVER_CHARS[Math.floor(Math.random() * HOVER_CHARS.length)];
+      litCells.push(next);
+      current = next;
+    }
+  };
+
+  const hoverHand = (control, event) => {
+    if (!control.cellList.length) return false;
+    const rect = control.canvas.getBoundingClientRect();
+    const mouseCol = ((event.clientX - rect.left) / rect.width) * control.columns;
+    const mouseRow = ((event.clientY - rect.top) / rect.height) * control.rows;
+
+    let closest = null;
+    let closestDist = Infinity;
+    for (const cell of control.cellList) {
+      const dx = mouseCol - cell.col;
+      const dy = mouseRow - cell.row;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < closestDist) {
+        closestDist = dist;
+        closest = cell;
+      }
+    }
+
+    if (closest && closestDist <= HOVER_RADIUS) {
+      highlightCluster(control, closest);
+      return true;
+    }
+
+    return false;
+  };
+
+  const arms = [
+    { element: left, src: "/handLeft.png", drift: -1 },
+    { element: right, src: "/handRight.png", drift: 1 },
+  ];
+
+  controls = arms.map(({ element, src, drift }) => {
+    const image = new Image();
+    const canvas = document.createElement("canvas");
+    image.className = "ascii-hand";
+    image.alt = "";
+    image.decoding = "async";
+    canvas.className = "ascii-canvas";
+    element.replaceChildren(image, canvas);
+
+    const control = {
+      element,
+      image,
+      canvas,
+      context: canvas.getContext("2d"),
+      drift,
+      source: null,
+      columns: 0,
+      rows: 0,
+      width: 0,
+      height: 0,
+      baselineOffset: CELL_SIZE * 0.72,
+      scale: 1.06,
+      cells: new Map(),
+      cellList: [],
+      x: gsap.quickTo(canvas, "x", { duration: 0.65, ease: "power3.out" }),
+      y: gsap.quickTo(canvas, "y", { duration: 0.65, ease: "power3.out" }),
+      rotate: gsap.quickTo(canvas, "rotate", { duration: 0.65, ease: "power3.out" }),
+    };
+
+    image.addEventListener("load", () => {
+      try {
+        control.source = prepareImage(image);
+        rebuildHand(control);
+      } catch {
+        control.context.clearRect(0, 0, control.canvas.width, control.canvas.height);
+      }
+    }, { once: true });
+    image.src = src;
+
+    return control;
+  });
+
+  let resizeFrame = null;
+  globalThis.addEventListener("resize", () => {
+    cancelAnimationFrame(resizeFrame);
+    resizeFrame = requestAnimationFrame(() => {
+      controls.forEach((control) => {
+        control.cells.clear();
+        control.cellList = [];
+        rebuildHand(control);
+      });
+      requestRender();
+    });
+  });
+
+  if (hasReducedMotion()) return;
+
+  footer.addEventListener("pointermove", (event) => {
+    const pointerX = event.clientX / globalThis.innerWidth - 0.5;
+    const pointerY = event.clientY / globalThis.innerHeight - 0.5;
+    let active = false;
+    controls.forEach((control) => {
+      control.x(pointerX * 34 * control.drift);
+      control.y(pointerY * 28);
+      control.rotate(pointerX * 5 * control.drift + pointerY * 2);
+      if (hoverHand(control, event)) active = true;
+    });
+    if (active) requestRender();
+  });
+
+  footer.addEventListener("pointerleave", () => {
+    controls.forEach((control) => {
+      control.x(0);
+      control.y(0);
+      control.rotate(0);
+    });
+  });
+}
+
 function initFooter() {
   const footer = document.querySelector(".footer");
   if (!footer) return;
+
+  setupFooterAscii(footer);
 
   const revealEase = gsap.parseEase("power2.inOut");
   footer.style.setProperty("--footer-reveal", "0vmax");
@@ -1157,8 +1514,8 @@ function initFooter() {
       footer.style.visibility = progress > 0 ? "visible" : "hidden";
       footer.style.setProperty("--footer-reveal", `${radius}vmax`);
       gsap.set(".footer-name", { y: 120 * (1 - progress) });
-      gsap.set(".ascii--left", { x: -140 * (1 - progress), opacity: 0.72 * progress });
-      gsap.set(".ascii--right", { x: 140 * (1 - progress), opacity: 0.72 * progress });
+      gsap.set(".ascii--left", { xPercent: -125 * (1 - progress), opacity: progress });
+      gsap.set(".ascii--right", { xPercent: 125 * (1 - progress), opacity: progress });
     },
   });
 }
