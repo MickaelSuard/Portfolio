@@ -410,7 +410,7 @@ function initHeroScroll() {
     }, 0.18)
     .to(media, { scale: 1, duration: 0.78, ease: "none" }, 0.18)
     .to([firstGroup, lastGroup], { opacity: 0, duration: 0.18, ease: "none" }, 0.78)
-    .to(".world-phrase", { opacity: 1, filter: "blur(0px)", duration: 0.18, ease: "none" }, 0.76);
+    .to(".world-phrase", { opacity: 1, filter: "blur(0px)", duration: 0.18, ease: "none" }, 0.58);
 
   gsap.timeline({
     scrollTrigger: {
