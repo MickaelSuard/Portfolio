@@ -862,22 +862,35 @@ function initProjects() {
 
 function initGallery() {
   const section = document.querySelector(".circle-gallery");
+  const pin = section?.querySelector(".circle-gallery__pin");
   const phrase = document.querySelector(".gallery-phrase");
   const cards = gsap.utils.toArray(".orbit-card");
   const words = gsap.utils.toArray(".gallery-phrase .word");
-  if (!section || !cards.length) return;
+  if (!section || !pin || !cards.length) return;
 
-  gsap.set(words, { opacity: 1, filter: "none" });
+  gsap.set(pin, { autoAlpha: 0 });
+  gsap.set(words, { opacity: 0, filter: "blur(8px)", y: 16 });
   gsap.set(phrase, { opacity: 1, y: 0 });
 
   const clamp = (value, min = 0, max = 1) => Math.max(min, Math.min(max, value));
   const ease = (value) => value * value * (3 - 2 * value);
   const mix = (from, to, value) => from + (to - from) * value;
 
-  let progress = 0;
+  let rawProgress = 0;
+  let galleryVisible = false;
+  const galleryLead = 0;
+  const phraseLead = 0.06;
 
-  const renderGallery = (nextProgress = progress) => {
-    progress = clamp(nextProgress);
+  const setGalleryVisible = (visible) => {
+    if (galleryVisible === visible) return;
+    galleryVisible = visible;
+    gsap.set(pin, { autoAlpha: visible ? 1 : 0 });
+  };
+
+  const renderGallery = (nextProgress = rawProgress) => {
+    rawProgress = clamp(nextProgress);
+    const progress = clamp(rawProgress + galleryLead);
+    const phraseProgress = clamp(rawProgress + phraseLead);
     const radiusX = Math.min(globalThis.innerWidth * (mobile ? 0.38 : 0.34), mobile ? 235 : 520);
     const radiusY = Math.min(globalThis.innerHeight * (mobile ? 0.16 : 0.18), mobile ? 105 : 155);
     const entryEnd = 0.18;
@@ -915,8 +928,13 @@ function initGallery() {
       card.style.transform = `translate(-50%, -50%) translate(${x}px, ${y}px) scale(${scale}) rotate(${rotation}deg)`;
     });
 
-    phrase.style.opacity = "1";
-    phrase.style.transform = "translateY(0px)";
+    words.forEach((word, index) => {
+      const wordStart = index * 0.028;
+      const wordProgress = ease(clamp((phraseProgress - wordStart) / 0.18));
+      word.style.opacity = wordProgress.toFixed(3);
+      word.style.filter = `blur(${((1 - wordProgress) * 8).toFixed(2)}px)`;
+      word.style.transform = `translateY(${((1 - wordProgress) * 16).toFixed(2)}px)`;
+    });
   };
 
   const galleryTrigger = ScrollTrigger.create({
@@ -925,8 +943,15 @@ function initGallery() {
     end: "bottom bottom",
     scrub: true,
     invalidateOnRefresh: true,
+    onEnter: () => setGalleryVisible(true),
+    onEnterBack: () => setGalleryVisible(true),
+    onLeave: () => setGalleryVisible(false),
+    onLeaveBack: () => setGalleryVisible(false),
     onUpdate: (self) => renderGallery(self.progress),
-    onRefresh: (self) => renderGallery(self.progress),
+    onRefresh: (self) => {
+      setGalleryVisible(globalThis.scrollY >= self.start && globalThis.scrollY <= self.end);
+      renderGallery(self.progress);
+    },
   });
 
   globalThis.addEventListener("resize", () => renderGallery(galleryTrigger.progress));

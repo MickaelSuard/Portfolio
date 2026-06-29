@@ -486,8 +486,8 @@ body.is-name-hover-ready .intro-char {
 
 .projects {
   position: relative;
-  min-height: 140vh;
-  padding: 12vh 0 20vh;
+  min-height: 118vh;
+  padding: 10vh 0 8vh;
   z-index: auto;
   color: var(--black);
   background: transparent;
@@ -1226,7 +1226,7 @@ body.is-name-hover-ready .intro-char {
 
   .projects {
     min-height: auto;
-    padding: 10vh 1.5rem 18vh;
+    padding: 8vh 1.5rem 8vh;
   }
 
   .projects-list {
