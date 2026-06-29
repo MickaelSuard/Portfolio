@@ -8,25 +8,31 @@ import { inject } from "@vercel/analytics";
 gsap.registerPlugin(ScrollTrigger);
 inject();
 
-const mobile = window.matchMedia("(max-width: 768px)").matches;
-const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-const previewMode = new URLSearchParams(window.location.search).has("preview");
+const mobile = globalThis.matchMedia("(max-width: 768px)").matches;
+
+function hasReducedMotion() {
+  return globalThis.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
+function isPreviewMode() {
+  return new URLSearchParams(globalThis.location.search).has("preview");
+}
 
 if ("scrollRestoration" in history) history.scrollRestoration = "manual";
-if (!previewMode && window.location.hash) history.replaceState(null, "", window.location.pathname + window.location.search);
+if (!isPreviewMode() && globalThis.location.hash) history.replaceState(null, "", globalThis.location.pathname + globalThis.location.search);
 
 let lenis = null;
 
 function resetScrollToTop() {
-  if (previewMode) return;
+  if (isPreviewMode()) return;
   document.documentElement.scrollTop = 0;
   document.body.scrollTop = 0;
-  window.scrollTo(0, 0);
+  globalThis.scrollTo(0, 0);
   lenis?.scrollTo(0, { immediate: true, force: true });
 }
 
 function keepInitialScrollAtTop() {
-  if (previewMode) return;
+  if (isPreviewMode()) return;
   let frames = 14;
   const reset = () => {
     resetScrollToTop();
@@ -41,9 +47,9 @@ function keepInitialScrollAtTop() {
 }
 
 resetScrollToTop();
-window.addEventListener("pageshow", keepInitialScrollAtTop);
-window.addEventListener("beforeunload", resetScrollToTop);
-window.addEventListener("load", keepInitialScrollAtTop);
+globalThis.addEventListener("pageshow", keepInitialScrollAtTop);
+globalThis.addEventListener("beforeunload", resetScrollToTop);
+globalThis.addEventListener("load", keepInitialScrollAtTop);
 
 let heroChromeReady = false;
 let heroChromeVisible = false;
@@ -70,7 +76,7 @@ function setHeroChromeVisible(visible, immediate = false) {
 }
 
 function initLenis() {
-  if (reduced || previewMode) return null;
+  if (hasReducedMotion() || isPreviewMode()) return null;
   const lenis = new Lenis({ duration: 1.15, smoothWheel: true, wheelMultiplier: 0.9 });
   lenis.on("scroll", ScrollTrigger.update);
   gsap.ticker.add((time) => lenis.raf(time * 1000));
@@ -99,9 +105,9 @@ function createGradientCanvas() {
   let height = 0;
 
   function resize() {
-    const dpr = Math.min(window.devicePixelRatio, 1.5);
-    width = window.innerWidth;
-    height = window.innerHeight;
+    const dpr = Math.min(globalThis.devicePixelRatio, 1.5);
+    width = globalThis.innerWidth;
+    height = globalThis.innerHeight;
     canvas.width = width * dpr;
     canvas.height = height * dpr;
     canvas.style.width = `${width}px`;
@@ -109,8 +115,8 @@ function createGradientCanvas() {
     context.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
 
-  window.addEventListener("resize", resize);
-  window.addEventListener("pointermove", (event) => {
+  globalThis.addEventListener("resize", resize);
+  globalThis.addEventListener("pointermove", (event) => {
     target.x = event.clientX / width;
     target.y = event.clientY / height;
   });
@@ -262,7 +268,7 @@ function initNameHover() {
     letterTweens.set(char, tween);
   };
 
-  window.addEventListener("pointermove", moveCursor, { passive: true });
+  globalThis.addEventListener("pointermove", moveCursor, { passive: true });
 
   targets.forEach(({ element, last }) => {
     const chars = gsap.utils.toArray(".intro-char", element);
@@ -299,7 +305,7 @@ function initIntro() {
   gsap.set(".hero", { opacity: 1 });
   setHeroChromeVisible(false, true);
 
-  if (previewMode || reduced) {
+  if (isPreviewMode() || hasReducedMotion()) {
     gsap.set(chars, { yPercent: 0 });
     gsap.set(".intro-bg, .transition-panels", { display: "none" });
     gsap.set(".hero-tagline", { opacity: 1, clipPath: "inset(0 0 0 0)" });
@@ -354,10 +360,10 @@ function initHeroScroll() {
     media.src = homeFrames[nextFrame].src;
   };
   const startWidth = mobile ? 24 : 34;
-  const startHeight = () => Math.round(window.innerHeight * (mobile ? 0.22 : 0.24));
+  const startHeight = () => Math.round(globalThis.innerHeight * (mobile ? 0.22 : 0.24));
   const introAspect = 1244 / 1666;
-  const worldCoverWidth = () => `${Math.max(window.innerWidth, window.innerHeight * introAspect)}px`;
-  const worldCoverHeight = () => `${Math.max(window.innerHeight, window.innerWidth / introAspect)}px`;
+  const worldCoverWidth = () => `${Math.max(globalThis.innerWidth, globalThis.innerHeight * introAspect)}px`;
+  const worldCoverHeight = () => `${Math.max(globalThis.innerHeight, globalThis.innerWidth / introAspect)}px`;
   gsap.set(viewport, {
     "--world-width": `${startWidth}px`,
     "--world-height": `${startHeight()}px`,
@@ -395,7 +401,7 @@ function initHeroScroll() {
     .to(viewport, { opacity: 1, duration: 0.01 }, 0.18)
     .to(nameColorTargets, { color: "#5d549c", duration: 0.12, ease: "none" }, 0.18)
     .to(nameColorTargets, { color: "#d9a441", duration: 0.18, ease: "none" }, 0.3)
-    .to(name, { "--intro-gap": () => `${window.innerWidth * (mobile ? 0.52 : 0.56)}px`, duration: 0.78, ease: "none" }, 0.18)
+    .to(name, { "--intro-gap": () => `${globalThis.innerWidth * (mobile ? 0.52 : 0.56)}px`, duration: 0.78, ease: "none" }, 0.18)
     .to(viewport, {
       "--world-width": worldCoverWidth,
       "--world-height": worldCoverHeight,
@@ -512,7 +518,7 @@ function createProjectCubePreview(art, initialProject) {
   const tileData = [];
   const breathDelays = [];
 
-  const cssImage = (src) => `url("${new URL(src, window.location.href).href}")`;
+  const cssImage = (src) => `url("${new URL(src, globalThis.location.href).href}")`;
   const setVisual = (project) => {
     art.style.setProperty("--project-tint", project?.tint || "rgba(93, 84, 156, 0.24)");
   };
@@ -541,7 +547,7 @@ function createProjectCubePreview(art, initialProject) {
     });
   };
 
-  if (!grid || reduced) {
+  if (!grid || hasReducedMotion()) {
     setVisual(initialProject);
     return {
       show(project) {
@@ -584,7 +590,7 @@ function createProjectCubePreview(art, initialProject) {
   }
   grid.replaceChildren(fragment);
   setProjectFaces(currentImage);
-  window.addEventListener("resize", () => setProjectFaces(currentImage));
+  globalThis.addEventListener("resize", () => setProjectFaces(currentImage));
   art.classList.add("is-cubes-ready");
 
   const tiles = tileData.map((tile) => tile.element);
@@ -794,14 +800,14 @@ function initProjects() {
 
   const clamp = (value, min = 0, max = 1) => Math.max(min, Math.min(max, value));
   const getProjectScrollMetrics = () => {
-    const sectionTop = section.getBoundingClientRect().top + window.scrollY;
-    const scrollRange = Math.max(1, section.offsetHeight - window.innerHeight);
+    const sectionTop = section.getBoundingClientRect().top + globalThis.scrollY;
+    const scrollRange = Math.max(1, section.offsetHeight - globalThis.innerHeight);
     return { sectionTop, scrollRange };
   };
 
   const getIndexFromScroll = () => {
     const { sectionTop, scrollRange } = getProjectScrollMetrics();
-    const progress = clamp((window.scrollY - sectionTop) / scrollRange);
+    const progress = clamp((globalThis.scrollY - sectionTop) / scrollRange);
     return Math.round(progress * (items.length - 1));
   };
 
@@ -815,7 +821,7 @@ function initProjects() {
       return;
     }
 
-    window.scrollTo({ top: targetY, behavior: reduced ? "auto" : "smooth" });
+    globalThis.scrollTo({ top: targetY, behavior: hasReducedMotion() ? "auto" : "smooth" });
   };
 
   ScrollTrigger.create({
@@ -832,7 +838,7 @@ function initProjects() {
   const xSetters = items.map((item) => gsap.quickTo(item, "x", { duration: 0.55, ease: "power2.out" }));
   const updateActive = () => {
     if (!visible) return;
-    const center = window.innerHeight / 2;
+    const center = globalThis.innerHeight / 2;
     items.forEach((item, index) => {
       const rect = item.getBoundingClientRect();
       const itemDistance = Math.abs(rect.top + rect.height / 2 - center);
@@ -848,7 +854,7 @@ function initProjects() {
     });
   });
 
-  window.addEventListener("scroll", updateActive, { passive: true });
+  globalThis.addEventListener("scroll", updateActive, { passive: true });
   lenis?.on("scroll", updateActive);
   activate(0);
   updateActive();
@@ -872,14 +878,14 @@ function initGallery() {
 
   const renderGallery = (nextProgress = progress) => {
     progress = clamp(nextProgress);
-    const radiusX = Math.min(window.innerWidth * (mobile ? 0.38 : 0.34), mobile ? 235 : 520);
-    const radiusY = Math.min(window.innerHeight * (mobile ? 0.16 : 0.18), mobile ? 105 : 155);
+    const radiusX = Math.min(globalThis.innerWidth * (mobile ? 0.38 : 0.34), mobile ? 235 : 520);
+    const radiusY = Math.min(globalThis.innerHeight * (mobile ? 0.16 : 0.18), mobile ? 105 : 155);
     const entryEnd = 0.18;
     const exitStart = 0.92;
     const cardGap = 0.115;
     const pathRange = 1 + cardGap * (cards.length - 1);
-    const lowerTrackY = Math.min(window.innerHeight * (mobile ? 0.34 : 0.32), mobile ? 230 : 310);
-    const exitTrackY = -Math.min(window.innerHeight * (mobile ? 0.1 : 0.12), mobile ? 80 : 120);
+    const lowerTrackY = Math.min(globalThis.innerHeight * (mobile ? 0.34 : 0.32), mobile ? 230 : 310);
+    const exitTrackY = -Math.min(globalThis.innerHeight * (mobile ? 0.1 : 0.12), mobile ? 80 : 120);
     const exitAngle = Math.PI * 4 - 0.38;
 
     cards.forEach((card, index) => {
@@ -893,9 +899,9 @@ function initGallery() {
       const orbitY = Math.sin(angle) * radiusY;
       const enter = ease(clamp(travel / entryEnd));
       const exit = ease(clamp((travel - exitStart) / (1 - exitStart)));
-      const startX = -window.innerWidth / 2 - cardWidth / 2 - 56;
+      const startX = -globalThis.innerWidth / 2 - cardWidth / 2 - 56;
       const startY = lowerTrackY;
-      const endX = window.innerWidth / 2 + cardWidth / 2 + 56;
+      const endX = globalThis.innerWidth / 2 + cardWidth / 2 + 56;
       const endY = exitTrackY;
       const x = mix(mix(startX, orbitX, enter), endX, exit);
       const y = mix(mix(startY, orbitY, enter), endY, exit);
@@ -923,8 +929,8 @@ function initGallery() {
     onRefresh: (self) => renderGallery(self.progress),
   });
 
-  window.addEventListener("resize", () => renderGallery(galleryTrigger.progress));
-  window.__updateGallery = () => renderGallery(galleryTrigger.progress);
+  globalThis.addEventListener("resize", () => renderGallery(galleryTrigger.progress));
+  globalThis.__updateGallery = () => renderGallery(galleryTrigger.progress);
   renderGallery(0);
 }
 
@@ -933,7 +939,7 @@ function createSkillPillPhysics(stage) {
   const pills = gsap.utils.toArray(".skill-pill", stage);
   if (!pills.length) return null;
 
-  if (reduced) {
+  if (hasReducedMotion()) {
     return {
       prepare: () => { },
       drop: () => { },
@@ -957,7 +963,7 @@ function createSkillPillPhysics(stage) {
       Runner.stop(runner);
       runner = null;
     }
-    window.clearTimeout(settleTimer);
+    globalThis.clearTimeout(settleTimer);
     settleTimer = null;
   }
 
@@ -1051,17 +1057,17 @@ function createSkillPillPhysics(stage) {
     runner = Runner.create();
     Runner.run(runner, engine);
     hasPlayed = true;
-    window.clearTimeout(settleTimer);
-    settleTimer = window.setTimeout(stop, 5600);
+    globalThis.clearTimeout(settleTimer);
+    settleTimer = globalThis.setTimeout(stop, 5600);
   }
 
   function resize() {
     if (!hasPlayed) return;
-    window.clearTimeout(resizeTimer);
-    resizeTimer = window.setTimeout(drop, 140);
+    globalThis.clearTimeout(resizeTimer);
+    resizeTimer = globalThis.setTimeout(drop, 140);
   }
 
-  window.addEventListener("resize", resize);
+  globalThis.addEventListener("resize", resize);
 
   return { prepare, drop, stop, resize };
 }
@@ -1145,8 +1151,8 @@ function initTimeline() {
   ];
 
   const update = () => {
-    const max = document.documentElement.scrollHeight - window.innerHeight;
-    const progress = max > 0 ? window.scrollY / max : 0;
+    const max = document.documentElement.scrollHeight - globalThis.innerHeight;
+    const progress = max > 0 ? globalThis.scrollY / max : 0;
     timeline.style.setProperty("--progress", `${progress * 100}%`);
     timeline.style.setProperty("--label-y", `${progress * 100}%`);
     pct.textContent = `(${Math.round(progress * 100)})`;
@@ -1154,28 +1160,28 @@ function initTimeline() {
     let current = "Home";
     sections.forEach(([name, selector]) => {
       const element = document.querySelector(selector);
-      const top = element.getBoundingClientRect().top + window.scrollY;
-      if (window.scrollY >= top - window.innerHeight * 0.45) current = name;
+      const top = element.getBoundingClientRect().top + globalThis.scrollY;
+      if (globalThis.scrollY >= top - globalThis.innerHeight * 0.45) current = name;
     });
     label.textContent = current;
-    const visible = window.scrollY > window.innerHeight * 3.4 && progress < 0.965;
+    const visible = globalThis.scrollY > globalThis.innerHeight * 3.4 && progress < 0.965;
     gsap.to([timeline, pct], { opacity: visible ? 1 : 0, duration: 0.25, overwrite: true });
   };
 
-  window.addEventListener("scroll", update, { passive: true });
+  globalThis.addEventListener("scroll", update, { passive: true });
   lenis?.on("scroll", update);
   update();
 }
 
 function initPreviewJump() {
-  const target = new URLSearchParams(window.location.search).get("preview");
+  const target = new URLSearchParams(globalThis.location.search).get("preview");
   if (!target || target === "1") return;
-  window.addEventListener("load", () => {
+  globalThis.addEventListener("load", () => {
     const section = document.querySelector(`#${target}, .${target}`);
     if (!section) return;
-    window.scrollTo(0, section.offsetTop + (target === "gallery" ? window.innerHeight * 1.5 : 0));
-    window.dispatchEvent(new Event("scroll"));
-    window.__updateGallery?.();
+    globalThis.scrollTo(0, section.offsetTop + (target === "gallery" ? globalThis.innerHeight * 1.5 : 0));
+    globalThis.dispatchEvent(new Event("scroll"));
+    globalThis.__updateGallery?.();
     ScrollTrigger.update();
   });
 }
@@ -1191,4 +1197,4 @@ initFooter();
 initTimeline();
 initPreviewJump();
 
-window.addEventListener("load", () => ScrollTrigger.refresh());
+globalThis.addEventListener("load", () => ScrollTrigger.refresh());
