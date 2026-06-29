@@ -945,11 +945,10 @@ function initGallery() {
     invalidateOnRefresh: true,
     onEnter: () => setGalleryVisible(true),
     onEnterBack: () => setGalleryVisible(true),
-    onLeave: () => setGalleryVisible(false),
     onLeaveBack: () => setGalleryVisible(false),
     onUpdate: (self) => renderGallery(self.progress),
     onRefresh: (self) => {
-      setGalleryVisible(globalThis.scrollY >= self.start && globalThis.scrollY <= self.end);
+      setGalleryVisible(globalThis.scrollY >= self.start);
       renderGallery(self.progress);
     },
   });
@@ -1169,10 +1168,10 @@ function initTimeline() {
   const pct = document.querySelector(".scroll-pct");
   const label = document.querySelector(".scroll-timeline__label");
   const sections = [
-    ["About", ".about"],
-    ["Projects", ".projects"],
-    ["Gallery", ".circle-gallery"],
-    ["Skills", ".skills"],
+    ["À propos", ".about"],
+    ["Projets", ".projects"],
+    ["Galerie", ".circle-gallery"],
+    ["Compétences", ".skills"],
   ];
 
   const update = () => {
