@@ -486,8 +486,8 @@ body.is-name-hover-ready .intro-char {
 
 .projects {
   position: relative;
-  min-height: 118vh;
-  padding: 10vh 0 8vh;
+  min-height: 240vh;
+  padding: 8vh 0;
   z-index: auto;
   color: var(--black);
   background: transparent;
